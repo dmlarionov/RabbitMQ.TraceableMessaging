@@ -1,5 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>dmlarionov</Authors>
+    <PackageDescription>.NET library implementing JSON serialization for RabbitMQ.TraceableMessaging</PackageDescription>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>.NET;RabbitMQ;tracing;distributed-tracing;json</PackageTags>
+    <RepositoryUrl>https://github.com/dmlarionov/RabbitMQ.TraceableMessaging</RepositoryUrl>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\RabbitMQ.TraceableMessaging\RabbitMQ.TraceableMessaging.csproj" />
   </ItemGroup>
@@ -7,9 +16,5 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="[11.0.1,)" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
 
 </Project>

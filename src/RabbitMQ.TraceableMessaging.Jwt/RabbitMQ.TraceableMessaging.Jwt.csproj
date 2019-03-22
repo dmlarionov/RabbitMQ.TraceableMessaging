@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>dmlarionov</Authors>
+    <PackageDescription>.NET library implementing JWT support for RabbitMQ.TraceableMessaging</PackageDescription>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>.NET;RabbitMQ;tracing;distributed-tracing;Authentication;Authorization;Token;jwt</PackageTags>
+    <RepositoryUrl>https://github.com/dmlarionov/RabbitMQ.TraceableMessaging</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>dmlarionov</Authors>
+    <PackageDescription>Base .NET library to implement RPC over RabbitMQ with distributed traceability (Application Insights, OpenTracing etc.). Library supports optional authorization based on bearer token.</PackageDescription>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>.NET;RabbitMQ;tracing;distributed-tracing;Authentication;Authorization;Token;</PackageTags>
+    <RepositoryUrl>https://github.com/dmlarionov/RabbitMQ.TraceableMessaging</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

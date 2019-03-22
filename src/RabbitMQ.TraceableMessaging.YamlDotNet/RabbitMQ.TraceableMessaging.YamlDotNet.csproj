@@ -1,15 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>dmlarionov</Authors>
+    <PackageDescription>.NET library implementing YAML serialization for RabbitMQ.TraceableMessaging</PackageDescription>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>.NET;RabbitMQ;tracing;distributed-tracing;yaml</PackageTags>
+    <RepositoryUrl>https://github.com/dmlarionov/RabbitMQ.TraceableMessaging</RepositoryUrl>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\RabbitMQ.TraceableMessaging\RabbitMQ.TraceableMessaging.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="YamlDotNet" Version="5.0.1" />
+    <PackageReference Include="YamlDotNet" Version="[5.0.1,)" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
 
 </Project>
