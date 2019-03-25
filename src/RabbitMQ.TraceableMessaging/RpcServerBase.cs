@@ -337,6 +337,9 @@ namespace RabbitMQ.TraceableMessaging
                 
                 // stay alive in production
                 #else
+                correlationId = null;
+                requestType = null;
+                remoteCall = null;
                 return false;
                 
                 #endif

@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2042
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMQ.TraceableMessaging", "src\RabbitMQ.TraceableMessaging\RabbitMQ.TraceableMessaging.csproj", "{6BD66BEF-CC54-4B83-A43E-22A976A80B5E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMQ.TraceableMessaging.Json", "src\RabbitMQ.TraceableMessaging.Json\RabbitMQ.TraceableMessaging.Json.csproj", "{7230D0E3-0883-4F1F-BAB7-59D1986AC78D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMQ.TraceableMessaging.Jwt", "src\RabbitMQ.TraceableMessaging.Jwt\RabbitMQ.TraceableMessaging.Jwt.csproj", "{5FE0764E-2B4C-4888-A998-26DF3ED5B2D1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMQ.TraceableMessaging.YamlDotNet", "src\RabbitMQ.TraceableMessaging.YamlDotNet\RabbitMQ.TraceableMessaging.YamlDotNet.csproj", "{ADFB800B-193A-4920-8437-1EB1F120706F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMQ.TraceableMessaging.ApplicationInsights", "src\RabbitMQ.TraceableMessaging.ApplicationInsights\RabbitMQ.TraceableMessaging.ApplicationInsights.csproj", "{73B55EE0-BEF9-4E8C-94A0-8025C7F33405}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6BD66BEF-CC54-4B83-A43E-22A976A80B5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BD66BEF-CC54-4B83-A43E-22A976A80B5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BD66BEF-CC54-4B83-A43E-22A976A80B5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BD66BEF-CC54-4B83-A43E-22A976A80B5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7230D0E3-0883-4F1F-BAB7-59D1986AC78D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7230D0E3-0883-4F1F-BAB7-59D1986AC78D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7230D0E3-0883-4F1F-BAB7-59D1986AC78D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7230D0E3-0883-4F1F-BAB7-59D1986AC78D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FE0764E-2B4C-4888-A998-26DF3ED5B2D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FE0764E-2B4C-4888-A998-26DF3ED5B2D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FE0764E-2B4C-4888-A998-26DF3ED5B2D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FE0764E-2B4C-4888-A998-26DF3ED5B2D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADFB800B-193A-4920-8437-1EB1F120706F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADFB800B-193A-4920-8437-1EB1F120706F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADFB800B-193A-4920-8437-1EB1F120706F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADFB800B-193A-4920-8437-1EB1F120706F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73B55EE0-BEF9-4E8C-94A0-8025C7F33405}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73B55EE0-BEF9-4E8C-94A0-8025C7F33405}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73B55EE0-BEF9-4E8C-94A0-8025C7F33405}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73B55EE0-BEF9-4E8C-94A0-8025C7F33405}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3005347A-5332-487E-A8AD-BCD6A52552C2}
+	EndGlobalSection
+EndGlobal
