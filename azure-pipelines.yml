@@ -6,6 +6,8 @@
 trigger:
 - master
 
+name: '1.0.$(Rev:.r)'
+
 pool:
   vmImage: 'Ubuntu-16.04'
 
@@ -17,13 +19,13 @@ steps:
   displayName: 'dotnet build -c $(buildConfiguration)'
   inputs:
     command: 'build'
-    configuration: '$(buildConfiguration)'
+    arguments: '-c $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet pack -c $(buildConfiguration) --no-build'
   inputs:
     command: 'pack'
-    configuration: '$(buildConfiguration)'
+    configurationToPack: '$(buildConfiguration)'
     packagesToPack: 'src/**/*.csproj' # Required with pack command
     packDirectory: '$(build.artifactStagingDirectory)'
     nobuild: true # Already built on previous step
