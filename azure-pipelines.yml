@@ -10,11 +10,22 @@ pool:
   vmImage: 'Ubuntu-16.04'
 
 variables:
-  buildConfiguration: 'Release'
+  buildConfiguration: 'release'
 
 steps:
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet build $(buildConfiguration)'
+  displayName: 'dotnet build -c $(buildConfiguration)'
   inputs:
     command: 'build'
     configuration: '$(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet pack -c $(buildConfiguration) --no-build'
+  inputs:
+    command: 'pack'
+    configuration: '$(buildConfiguration)'
+    packagesToPack: 'src/**/*.csproj' # Required with pack command
+    packDirectory: '$(build.artifactStagingDirectory)'
+    nobuild: true # Already built on previous step
+    versioningScheme: 'byBuildNumber'
+    verbosityPack: 'detailed'
