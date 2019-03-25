@@ -4,7 +4,13 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-- master
+  branches:
+    include:
+    - master
+  paths:
+    exclude:
+    - docs/*
+    - README.md
 
 name: '1.0.$(Rev:r)'
 
@@ -30,4 +36,4 @@ steps:
     packDirectory: '$(build.artifactStagingDirectory)'
     nobuild: true # Already built on previous step
     versioningScheme: 'byBuildNumber'
-    verbosityPack: 'detailed'
+    verbosityPack: 'normal'
