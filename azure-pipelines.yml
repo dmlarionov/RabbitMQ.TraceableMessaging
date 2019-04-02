@@ -27,6 +27,28 @@ steps:
     command: 'build'
     arguments: '-c $(buildConfiguration)'
 
+- task: DockerCompose@0
+  displayName: Start RabbitMQ
+  inputs:
+    action: Start RabbitMQ
+    dockerComposeFile: docker-compose.yml 
+    projectName: $(Build.Repository.Name)
+    dockerComposeCommand: up
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet test -c $(buildConfiguration)'
+  inputs:
+    command: 'test'
+    arguments: '-c $(buildConfiguration)'
+
+- task: DockerCompose@0
+  displayName: Stop RabbitMQ
+  inputs:
+    action: Stop RabbitMQ
+    dockerComposeFile: docker-compose.yml 
+    projectName: $(Build.Repository.Name)
+    dockerComposeCommand: down
+
 - task: DotNetCoreCLI@2
   displayName: 'dotnet pack -c $(buildConfiguration) --no-build'
   inputs:
