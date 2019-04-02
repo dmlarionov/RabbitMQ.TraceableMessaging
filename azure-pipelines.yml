@@ -43,6 +43,7 @@ steps:
 
 - task: DockerCompose@0
   displayName: Stop RabbitMQ
+  condition: always()
   inputs:
     action: Stop RabbitMQ
     dockerComposeFile: docker-compose.yml 
