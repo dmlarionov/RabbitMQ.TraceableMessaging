@@ -8,6 +8,7 @@ using RabbitMQ.TraceableMessaging.Tests.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace RabbitMQ.TraceableMessaging.Tests.Fixtures
 {
@@ -20,6 +21,8 @@ namespace RabbitMQ.TraceableMessaging.Tests.Fixtures
         public IConnection ClientConnection { get; private set; }
         public IModel ClientChannel { get; private set; }
         public TestRpcClientBase Client { get; private set; }
+
+        public int SleepTimeout { get; set; } = 0;
 
         public PingPongFixture()
         {
@@ -72,6 +75,8 @@ namespace RabbitMQ.TraceableMessaging.Tests.Fixtures
 
         void Pong(object sender, RequestEventArgs<TestTelemetryContext, TestSecurityContext> ea)
         {
+            Thread.Sleep(this.SleepTimeout);
+
             switch (ea.RequestType)
             {
                 case nameof(Ping1):

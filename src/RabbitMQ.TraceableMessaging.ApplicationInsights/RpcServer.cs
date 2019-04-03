@@ -96,7 +96,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
                     operation.Telemetry.Source = source;
 
                 // add metrics to telemetry operation
-                operation.Telemetry.Metrics.Add("activeCallsCount", _activeCallsCount);
+                operation.Telemetry.Metrics.Add("activeCallsCount", ActiveCallsCount);
 
                 // create telemetry context
                 return new TelemetryContext {
@@ -231,7 +231,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
                 }
 
                 // decrease counter
-                _activeCallsCount--;
+                ActiveCallsCount--;
             }
         }
     }

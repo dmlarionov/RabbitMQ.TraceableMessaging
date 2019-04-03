@@ -36,7 +36,7 @@ namespace RabbitMQ.TraceableMessaging
         /// <summary>
         /// Default timeout to stop processing remote call (milliseconds)
         /// </summary>
-        protected int _defaultTimeout = 60000;  // 1 minute
+        public int DefaultTimeout { get; set; } = 60000;  // 1 minute
 
         /// <summary>
         /// RabbitMQ channel
@@ -69,7 +69,7 @@ namespace RabbitMQ.TraceableMessaging
         /// <summary>
         /// Number of current (in processing) remote calls
         /// </summary>
-        protected int _activeCallsCount = 0;
+        public int ActiveCallsCount { get; protected set; } = 0;
 
         /// <summary>
         /// Creates basic server for RPC over RabbitMQ
@@ -299,7 +299,7 @@ namespace RabbitMQ.TraceableMessaging
                     timeout = (int)_timeout;
                 }
                 else
-                    timeout = _defaultTimeout;
+                    timeout = DefaultTimeout;
 
                 // extract request type
                 object _requestType;
@@ -322,7 +322,7 @@ namespace RabbitMQ.TraceableMessaging
                 _remoteCalls[correlationId] = remoteCall;
 
                 // increase counter of current calls
-                _activeCallsCount++;
+                ActiveCallsCount++;
 
                 return true;
             }
@@ -475,7 +475,7 @@ namespace RabbitMQ.TraceableMessaging
             }
 
             // decrease counter
-            _activeCallsCount--;
+            ActiveCallsCount--;
         }
 
         /// <summary>
