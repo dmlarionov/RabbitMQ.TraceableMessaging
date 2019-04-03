@@ -31,8 +31,9 @@ namespace RabbitMQ.TraceableMessaging.Tests
         }
 
         [Fact]
-        public void UnknownPing()
+        public void RequestFailure()
         {
+            // request whould fail because fixture doesn't know how to treat this request object type
             Assert.Throws<RequestFailureException>(() => Fixture.Client.GetReply<Pong2>(new object()));
         }
     }
