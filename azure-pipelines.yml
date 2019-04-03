@@ -43,12 +43,12 @@ steps:
 - task: DockerCompose@0
   displayName: Start RabbitMQ
   inputs:
-    action: Run a Docker Compose command
+    action: Run services
     dockerComposeFile: docker-compose.yml
     projectName: $(Build.Repository.Name)
     containerregistrytype: Container Registry
     dockerRegistryEndpoint: DockerHub
-    dockerComposeCommand: up
+    #dockerComposeCommand: up
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test -c $(buildConfiguration)'
