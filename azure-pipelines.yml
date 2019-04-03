@@ -31,26 +31,26 @@ steps:
 #   displayName: Login to Docker Hub
 #   inputs:
 #     command: login
-#     containerregistrytype: Container Registry
-#     dockerRegistryEndpoint: DockerHub
+#     containerregistrytype: 'Container Registry'
+#     dockerRegistryEndpoint: 'DockerHub'
 
 - task: Docker@1
   displayName: Pull RabbitMQ from Docker Hub
   inputs:
     command: pull
     arguments: 'rabbitmq'
-    containerregistrytype: Container Registry
-    dockerRegistryEndpoint: DockerHub
+    containerregistrytype: 'Container Registry'
+    dockerRegistryEndpoint: 'DockerHub'
 
 # DockerCompose@0 doesn't pull image... that's we have to pull it with Docker@1 command
 - task: DockerCompose@0
   displayName: Start RabbitMQ
   inputs:
-    action: Run services
+    action: 'Run services'
     dockerComposeFile: docker-compose.yml
     projectName: $(Build.Repository.Name)
-    containerregistrytype: Container Registry
-    dockerRegistryEndpoint: DockerHub
+    containerregistrytype: 'Container Registry'
+    dockerRegistryEndpoint: 'DockerHub'
     #dockerComposeCommand: up
 
 - task: DotNetCoreCLI@2
@@ -66,8 +66,8 @@ steps:
     action: Run a Docker Compose command
     dockerComposeFile: docker-compose.yml
     projectName: $(Build.Repository.Name)
-    containerregistrytype: Container Registry
-    dockerRegistryEndpoint: DockerHub
+    containerregistrytype: 'Container Registry'
+    dockerRegistryEndpoint: 'DockerHub'
     dockerComposeCommand: down
 
 # - task: Docker@1
@@ -75,8 +75,8 @@ steps:
 #   condition: always()
 #   inputs:
 #     command: logout
-#     containerregistrytype: Container Registry
-#     dockerRegistryEndpoint: DockerHub
+#     containerregistrytype: 'Container Registry'
+#     dockerRegistryEndpoint: 'DockerHub'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet pack -c $(buildConfiguration) --no-build'
