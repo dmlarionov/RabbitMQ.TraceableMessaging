@@ -30,13 +30,12 @@ steps:
 - task: DockerCompose@0
   displayName: Start RabbitMQ
   inputs:
-    action: Start RabbitMQ
+    action: Run a Docker Compose command
     dockerComposeFile: docker-compose.yml
     projectName: $(Build.Repository.Name)
-    cwd: $(Build.Repository.LocalPath)
-    dockerComposeCommand: up
     containerregistrytype: Container Registry
     dockerRegistryEndpoint: DockerHub
+    dockerComposeCommand: up
 
 
 - task: DotNetCoreCLI@2
@@ -49,10 +48,9 @@ steps:
   displayName: Stop RabbitMQ
   condition: always()
   inputs:
-    action: Stop RabbitMQ
+    action: Run a Docker Compose command
     dockerComposeFile: docker-compose.yml
     projectName: $(Build.Repository.Name)
-    cwd: $(Build.Repository.LocalPath)
     containerregistrytype: Container Registry
     dockerRegistryEndpoint: DockerHub
     dockerComposeCommand: down
