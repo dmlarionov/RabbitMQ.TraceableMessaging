@@ -43,7 +43,6 @@ steps:
     dockerRegistryEndpoint: DockerHub
     dockerComposeCommand: up
 
-
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test -c $(buildConfiguration)'
   inputs:
