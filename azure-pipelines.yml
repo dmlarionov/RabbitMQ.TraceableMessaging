@@ -31,8 +31,9 @@ steps:
   displayName: Start RabbitMQ
   inputs:
     action: Start RabbitMQ
-    dockerComposeFile: docker-compose.yml 
+    dockerComposeFile: docker-compose.yml
     projectName: $(Build.Repository.Name)
+    cwd: $(Build.Repository.LocalPath)
     dockerComposeCommand: up
 
 - task: DotNetCoreCLI@2
@@ -46,8 +47,9 @@ steps:
   condition: always()
   inputs:
     action: Stop RabbitMQ
-    dockerComposeFile: docker-compose.yml 
+    dockerComposeFile: docker-compose.yml
     projectName: $(Build.Repository.Name)
+    cwd: $(Build.Repository.LocalPath)
     dockerComposeCommand: down
 
 - task: DotNetCoreCLI@2
