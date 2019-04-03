@@ -27,12 +27,12 @@ steps:
     command: 'build'
     arguments: '-c $(buildConfiguration)'
 
-# - task: Docker@1
-#   displayName: Login to Docker Hub
-#   inputs:
-#     command: login
-#     containerregistrytype: 'Container Registry'
-#     dockerRegistryEndpoint: 'DockerHub'
+- task: Docker@1
+  displayName: Login to Docker Hub
+  inputs:
+    command: login
+    containerregistrytype: 'Container Registry'
+    dockerRegistryEndpoint: 'DockerHub'
 
 - task: Docker@1
   displayName: Pull RabbitMQ from Docker Hub
@@ -70,13 +70,13 @@ steps:
     dockerRegistryEndpoint: 'DockerHub'
     dockerComposeCommand: down
 
-# - task: Docker@1
-#   displayName: Logout from Docker Hub
-#   condition: always()
-#   inputs:
-#     command: logout
-#     containerregistrytype: 'Container Registry'
-#     dockerRegistryEndpoint: 'DockerHub'
+- task: Docker@1
+  displayName: Logout from Docker Hub
+  condition: always()
+  inputs:
+    command: logout
+    containerregistrytype: 'Container Registry'
+    dockerRegistryEndpoint: 'DockerHub'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet pack -c $(buildConfiguration) --no-build'
