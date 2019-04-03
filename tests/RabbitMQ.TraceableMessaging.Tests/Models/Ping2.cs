@@ -8,6 +8,8 @@ namespace RabbitMQ.TraceableMessaging.Tests.Models
     {
         public string Payload { get; set; }
 
+        public Ping2() { }
+
         public Ping2(string payload) => Payload = payload;
     }
 }
