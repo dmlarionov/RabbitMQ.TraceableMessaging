@@ -27,22 +27,22 @@ steps:
     command: 'build'
     arguments: '-c $(buildConfiguration)'
 
-- task: Docker@1
-  displayName: Login to Docker Hub
-  inputs:
-    command: login
-    containerregistrytype: 'Container Registry'
-    dockerRegistryEndpoint: 'DockerHub'
+# - task: Docker@1
+#   displayName: Login to Docker Hub
+#   inputs:
+#     command: login
+#     containerregistrytype: 'Container Registry'
+#     dockerRegistryEndpoint: 'DockerHub'
 
-- task: Docker@1
-  displayName: Pull RabbitMQ from Docker Hub
-  inputs:
-    command: pull
-    arguments: 'rabbitmq'
-    containerregistrytype: 'Container Registry'
-    dockerRegistryEndpoint: 'DockerHub'
+# - task: Docker@1
+#   displayName: Pull RabbitMQ from Docker Hub
+#   inputs:
+#     command: pull
+#     arguments: 'rabbitmq'
+#     containerregistrytype: 'Container Registry'
+#     dockerRegistryEndpoint: 'DockerHub'
 
-# DockerCompose@0 doesn't pull image... that's we have to pull it with Docker@1 command
+# DockerCompose@0 doesn pull image if needed
 - task: DockerCompose@0
   displayName: Start RabbitMQ
   inputs:
@@ -70,13 +70,13 @@ steps:
     dockerRegistryEndpoint: 'DockerHub'
     dockerComposeCommand: down
 
-- task: Docker@1
-  displayName: Logout from Docker Hub
-  condition: always()
-  inputs:
-    command: logout
-    containerregistrytype: 'Container Registry'
-    dockerRegistryEndpoint: 'DockerHub'
+# - task: Docker@1
+#   displayName: Logout from Docker Hub
+#   condition: always()
+#   inputs:
+#     command: logout
+#     containerregistrytype: 'Container Registry'
+#     dockerRegistryEndpoint: 'DockerHub'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet pack -c $(buildConfiguration) --no-build'
