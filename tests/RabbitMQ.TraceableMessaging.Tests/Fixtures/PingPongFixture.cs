@@ -48,7 +48,7 @@ namespace RabbitMQ.TraceableMessaging.Tests.Fixtures
                 var consumeOptions = new ConsumeOptions();
                 consumeOptions.Queue = requestQueueName;
 
-                Server = new TestRpcServerBase(ServerChannel, consumeOptions, new TFormatOptions());
+                Server = CreateTestRpcServerBase(ServerChannel, consumeOptions, new TFormatOptions());
             }
 
             {
@@ -72,6 +72,12 @@ namespace RabbitMQ.TraceableMessaging.Tests.Fixtures
 
             Server.Received += Pong;
         }
+
+        protected virtual TestRpcServerBase CreateTestRpcServerBase(
+            IModel serverChannel, 
+            ConsumeOptions consumeOptions,
+            TFormatOptions formatOptions) => 
+                new TestRpcServerBase(serverChannel, consumeOptions, formatOptions);
 
         void Pong(object sender, RequestEventArgs<TestTelemetryContext, TestSecurityContext> ea)
         {

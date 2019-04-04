@@ -1,11 +1,44 @@
-﻿using RabbitMQ.TraceableMessaging.Tests.Impl.Models;
+﻿using Newtonsoft.Json;
+using RabbitMQ.TraceableMessaging.Exceptions;
+using RabbitMQ.TraceableMessaging.Models;
+using RabbitMQ.TraceableMessaging.Options;
+using RabbitMQ.TraceableMessaging.Tests.Impl.Models;
+using RabbitMQ.TraceableMessaging.Tests.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace RabbitMQ.TraceableMessaging.Tests.Impl.Options
 {
-    public class TestSecurityOptions : RabbitMQ.TraceableMessaging.Options.SecurityOptions<TestSecurityContext>
+    public class TestSecurityOptions : SecurityOptions<TestSecurityContext>
     {
+        public TestSecurityOptions()
+        {
+            CreateSecurityContext = (accessTokenEncoded) =>
+            {
+                var token = JsonConvert.DeserializeObject<Token>(accessTokenEncoded);
+                switch (token.ValidationBehaviour)
+                {
+                    case (TokenValidationBehaviour.Forbidden):
+                        throw new ForbiddenException("TokenValidationBehaviour == Forbidden");
+
+                    case (TokenValidationBehaviour.Unauthorized):
+                        throw new UnauthorizedException("TokenValidationBehaviour == Unauthorized");
+
+                    default:
+                        return new TestSecurityContext { UserIdentity = token.UserIdentity, Scopes = token.Scopes };
+                }
+            };
+
+            Authorize = (string requestType, TestSecurityContext context) =>
+            {
+                if (context.Scopes.Contains(requestType))
+                    return new AuthzResult(true, null);
+
+                else
+                    return new AuthzResult(false, "Request type forbidden!");
+            };
+        }
     }
 }
