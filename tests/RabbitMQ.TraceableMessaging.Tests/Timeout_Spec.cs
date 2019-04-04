@@ -20,16 +20,15 @@ namespace RabbitMQ.TraceableMessaging.Tests
         }
 
         [Fact]
-        public async Task Timeout1()
+        public async Task Timeout()
         {
-            Assert.True(Fixture.Server.ActiveCallsCount == 0, "ActiveCallsCount expected to be 0 at start");
-            var t = Fixture.Client.GetReplyAsync<Pong1>(new Ping1(), timeout: 200);
-            await Task.Delay(TimeSpan.FromMilliseconds(50));
-            Assert.True(Fixture.Server.ActiveCallsCount == 1, "ActiveCallsCount expected to be 1 during request");
-            await Task.Delay(TimeSpan.FromMilliseconds(150));
-            Assert.True(Fixture.Server.ActiveCallsCount == 0, "ActiveCallsCount expected to be 0 after timeout");
-            t.Wait();
-            Assert.IsType<TimeoutException>(t.Exception);
+            await Assert.ThrowsAsync<TimeoutException>(() => Fixture.Client.GetReplyAsync<Pong1>(new Ping1(), timeout: 50));
+        }
+
+        [Fact]
+        public async Task NoTimeout()
+        {
+            await Fixture.Client.GetReplyAsync<Pong1>(new Ping1(), timeout: 150);
         }
     }
 }
