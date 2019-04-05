@@ -19,9 +19,6 @@ namespace RabbitMQ.TraceableMessaging.Tests.Impl.Options
             CreateSecurityContext = (accessTokenEncoded) =>
             {
                 var token = JsonConvert.DeserializeObject<Token>(accessTokenEncoded);
-
-                token.Scopes.Select(s => new Claim("scope", s));
-
                 switch (token.ValidationBehaviour)
                 {
                     case (TokenValidationBehaviour.Forbidden):
