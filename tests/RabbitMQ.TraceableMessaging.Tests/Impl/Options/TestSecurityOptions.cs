@@ -7,6 +7,7 @@ using RabbitMQ.TraceableMessaging.Tests.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 
 namespace RabbitMQ.TraceableMessaging.Tests.Impl.Options
@@ -18,6 +19,9 @@ namespace RabbitMQ.TraceableMessaging.Tests.Impl.Options
             CreateSecurityContext = (accessTokenEncoded) =>
             {
                 var token = JsonConvert.DeserializeObject<Token>(accessTokenEncoded);
+
+                token.Scopes.Select(s => new Claim("scope", s));
+
                 switch (token.ValidationBehaviour)
                 {
                     case (TokenValidationBehaviour.Forbidden):
@@ -27,7 +31,16 @@ namespace RabbitMQ.TraceableMessaging.Tests.Impl.Options
                         throw new UnauthorizedException("TokenValidationBehaviour == Unauthorized");
 
                     default:
-                        return new TestSecurityContext { UserIdentity = token.UserIdentity, Scopes = token.Scopes };
+                        return new TestSecurityContext {
+                            Principal = new ClaimsPrincipal(
+                                new ClaimsIdentity(
+                                    token.Scopes.Select(s => new Claim("scope", s))
+                                        .Append(new Claim("sub", token.UserIdentity)),
+                                    "test", // authentication type
+                                    "sub",  // name claim type (we put it there)
+                                    null)), // role type (we don't have it)
+                            Scopes = token.Scopes
+                        };
                 }
             };
 
