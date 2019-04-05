@@ -22,20 +22,14 @@ namespace RabbitMQ.TraceableMessaging.Tests
         }
 
         [Fact]
-        public async Task ForbiddenTokenValidation()
+        public async Task UnauthorizedNoToken()
         {
-            await Assert.ThrowsAsync<ForbiddenException>(() =>
-                Fixture.Client.GetReplyAsync<Pong1>(new Ping1(), 
-                    accessToken: JsonConvert.SerializeObject(
-                        new Token {
-                            UserIdentity = UserId,
-                            ValidationBehaviour = TokenValidationBehaviour.Forbidden,
-                            Scopes = new string[] { "Ping1" }
-                        })));
+            await Assert.ThrowsAsync<UnauthorizedException>(() =>
+                Fixture.Client.GetReplyAsync<Pong1>(new Ping1()));
         }
 
         [Fact]
-        public async Task UnauthorizedTokenValidation()
+        public async Task UnauthorizedInvalidToken()
         {
             await Assert.ThrowsAsync<UnauthorizedException>(() =>
                 Fixture.Client.GetReplyAsync<Pong1>(new Ping1(),
@@ -49,22 +43,22 @@ namespace RabbitMQ.TraceableMessaging.Tests
         }
 
         [Fact]
-        public async Task Passed()
+        public async Task ForbiddenInvalidToken()
         {
-            await Fixture.Client.GetReplyAsync<Pong1>(new Ping1(),
+            await Assert.ThrowsAsync<ForbiddenException>(() =>
+                Fixture.Client.GetReplyAsync<Pong1>(new Ping1(), 
                     accessToken: JsonConvert.SerializeObject(
-                        new Token
-                        {
+                        new Token {
                             UserIdentity = UserId,
-                            ValidationBehaviour = TokenValidationBehaviour.Pass,
+                            ValidationBehaviour = TokenValidationBehaviour.Forbidden,
                             Scopes = new string[] { "Ping1" }
-                        }));
+                        })));
         }
 
         [Fact]
-        public async Task ForbiddenScopeCheck()
+        public async Task ForbiddenNoScope()
         {
-            // We don't pass "Ping1" due to unexistence of it in the scope
+            // We don't pass "Ping1" due to unexistence of it in the scopes
             // (checked by TestSecurityOptions.Authorize delegate)
             await Assert.ThrowsAsync<ForbiddenException>(() =>
                 Fixture.Client.GetReplyAsync<Pong1>(new Ping1(),
@@ -78,11 +72,23 @@ namespace RabbitMQ.TraceableMessaging.Tests
         }
 
         [Fact]
-        public async Task SkippedScopeCheck()
+        public async Task PassedCheck()
         {
-            // We pass "Ping2" despite unexistence of it in the scope
+            await Fixture.Client.GetReplyAsync<Pong1>(new Ping1(),
+                    accessToken: JsonConvert.SerializeObject(
+                        new Token
+                        {
+                            UserIdentity = UserId,
+                            ValidationBehaviour = TokenValidationBehaviour.Pass,
+                            Scopes = new string[] { "Ping1" }
+                        }));
+        }
+
+        [Fact]
+        public async Task SkippedCheckForRequestType()
+        {
+            // We pass "Ping2" despite unexistence of it in the scopes
             // due to TestSecurityOptions.SkipForRequestTypes exclusion
-            // configured in SecurityFixture
             await Fixture.Client.GetReplyAsync<Pong2>(new Ping2(),
                     accessToken: JsonConvert.SerializeObject(
                         new Token
