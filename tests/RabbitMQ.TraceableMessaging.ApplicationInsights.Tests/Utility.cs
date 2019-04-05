@@ -1,4 +1,7 @@
-﻿using RabbitMQ.Client;
+﻿using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.Extensibility;
+using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,5 +23,19 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests
 
         public static IConnection CreateConnection() =>
             GetConnectionFactory().CreateConnection();
+
+        public static TelemetryConfiguration GetTelemetryConfiguration(ITelemetryChannel telemetryChannel)
+        {
+            var configuration = new TelemetryConfiguration
+            {
+                TelemetryChannel = telemetryChannel,
+                InstrumentationKey = Guid.NewGuid().ToString()
+            };
+            configuration.TelemetryInitializers.Add(new ActivityTelemetryInitializer());
+            return configuration;
+        }
+
+        public static TelemetryClient GetTelemetryClient(ITelemetryChannel telemetryChannel)
+            => new TelemetryClient(GetTelemetryConfiguration(telemetryChannel));
     }
 }

@@ -28,11 +28,6 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
         private TelemetryClient _telemetryClient;
 
         /// <summary>
-        /// Don't allow to pass exceptions upward
-        /// </summary>
-        private bool _swallowExceptions;
-
-        /// <summary>
         /// Creates client for RPC over RabbitMQ with Application Insights distributed tracing
         /// </summary>
         /// <param name="channel">RabbitMQ channel</param>
@@ -40,19 +35,15 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
         /// <param name="consumeOptions">Options to consume reply</param>
         /// <param name="formatOptions">Options to serialize / deserialize</param>
         /// <param name="telemetryClient">Application Insights telemetry client</param>
-        /// <param name="swallowExceptions">Don't allow to pass exceptions upward</param>
         public RpcClient(
             IModel channel,
             PublishOptions publishOptions,
             ConsumeOptions consumeOptions,
             FormatOptions formatOptions,
-            TelemetryClient telemetryClient = null,
-            bool swallowExceptions = false) : base(channel, publishOptions, consumeOptions, formatOptions)
+            TelemetryClient telemetryClient = null) : base(channel, publishOptions, consumeOptions, formatOptions)
         {
             // save telemetry client
             _telemetryClient = telemetryClient ?? new TelemetryClient(TelemetryConfiguration.Active);
-
-            _swallowExceptions = swallowExceptions;
         }
 
         /// <summary>
@@ -73,9 +64,11 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
             // this variable keeps result to return
             TReply response;
 
+            // start diagnostic activity
+            var activity = new Activity(TelemetryOptions.GetDependencyName(_publishOptions, request));
+
             // create telemetry operation
-            using (var operation = _telemetryClient.StartOperation<DependencyTelemetry>(
-                new Activity(TelemetryOptions.GetDependencyName(_publishOptions, request))))
+            using (var operation = _telemetryClient.StartOperation<DependencyTelemetry>(activity))
             {
                 // setup telemetry operation type
                 operation.Telemetry.Type = TelemetryOptions.TelemetryType;
@@ -90,8 +83,8 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
                         props.Headers = new Dictionary<string, object>();
 
                     props.Headers.Add("TelemetryOperationId", operation.Telemetry.Context.Operation.Id);
-                    props.Headers.Add("TelemetryParentId", operation.Telemetry.Id);
-                    //props.Headers.Add("TelemetrySource", ...); still not supported
+                    props.Headers.Add("TelemetryOperationParentId", operation.Telemetry.Id);
+                    //props.Headers.Add("TelemetrySource", ...); still not supported here
                     response = base.GetReply<TReply>(request, accessToken, timeout, props);
 
                     // set operation.Telemetry success
@@ -123,10 +116,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
                     else
                         operation.Telemetry.ResultCode = "Exception";
 
-                    if (!_swallowExceptions)
-                        throw e;
-                    else
-                        response = null;
+                    throw e;
                 }
                 finally
                 {

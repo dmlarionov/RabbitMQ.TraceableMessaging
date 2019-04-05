@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.TelemetryStubbing
+namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Mocks
 {
     public class MockTelemetryChannel : ITelemetryChannel
     {

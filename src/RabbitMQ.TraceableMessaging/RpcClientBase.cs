@@ -210,13 +210,13 @@ namespace RabbitMQ.TraceableMessaging
                     switch(reply.Status)
                     {
                         case ReplyStatus.Fail:
-                            throw new RequestFailureException($"Remote call failure: {reply.ErrorMessage}");
+                            throw new RequestFailureException($"Dependency failure: {reply.ErrorMessage}");
 
                         case ReplyStatus.Unauthorized:
-                            throw new UnauthorizedException($"Unauthorized for remote call: {reply.ErrorMessage}");
+                            throw new UnauthorizedException($"Unauthorized to dependency: {reply.ErrorMessage}");
 
                         case ReplyStatus.Forbidden:
-                            throw new ForbiddenException($"Forbidden access to remote service: {reply.ErrorMessage}");
+                            throw new ForbiddenException($"Forbidden access to dependency: {reply.ErrorMessage}");
 
                         default:
                             return reply;

@@ -7,7 +7,7 @@ using RabbitMQ.TraceableMessaging.ApplicationInsights.Options;
 using RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Impl;
 using RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Impl.Models;
 using RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Models;
-using RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.TelemetryStubbing;
+using RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Mocks;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -70,7 +70,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Fixtures
                     consumeOptions.Queue = queue;
 
                     // configure server telemetry client
-                    ServerTelemetryClient = Stubbing.GetTelemetryClient(telemetryChannel);
+                    ServerTelemetryClient = Utility.GetTelemetryClient(telemetryChannel);
 
                     Server = new RpcServer<TestSecurityContext>(
                         ServerChannel,
@@ -103,7 +103,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Fixtures
                         publishOptions,
                         consumeOptions,
                         new TFormatOptions(),
-                        Stubbing.GetTelemetryClient(telemetryChannel));
+                        Utility.GetTelemetryClient(telemetryChannel));
                 }
 
                 Server.Received += ForwardOrPong;

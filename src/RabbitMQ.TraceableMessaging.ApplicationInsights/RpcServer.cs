@@ -73,7 +73,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
             // extract telemetry parent operation id
             object _parentId;
             string parentId = null;
-            if (remoteCall.Headers.TryGetValue("TelemetryParentId", out _parentId))
+            if (remoteCall.Headers.TryGetValue("TelemetryOperationParentId", out _parentId))
                 parentId = Encoding.UTF8.GetString((byte[])_parentId);
 
             // extract telemetry source
@@ -84,10 +84,24 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
 
             // start telemetry operation
             if (_telemetryClient.IsEnabled() &&
-                operationId != null)
+                (operationId != null || parentId != null))
             {
-                // start telemetry operation
-                var operation = _telemetryClient.StartOperation<RequestTelemetry>(TelemetryOptions.GetRequestName(ea), operationId, parentId);
+                Activity activity = null;
+                IOperationHolder<RequestTelemetry> operation;
+
+                if (!string.IsNullOrEmpty(parentId))
+                {
+
+                    // start diagnostic activity
+                    activity = new Activity(TelemetryOptions.GetRequestName(ea));
+                    activity.SetParentId(parentId);
+
+                    // start telemetry operation (based on parent)
+                    operation = _telemetryClient.StartOperation<RequestTelemetry>(activity);
+                }
+                else
+                    // start telemetry operation (without parent)
+                    operation = _telemetryClient.StartOperation<RequestTelemetry>(TelemetryOptions.GetRequestName(ea), operationId);
 
                 // support source here (currently not supported by RpcClient)
                 if (!string.IsNullOrEmpty(source))
@@ -98,6 +112,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
 
                 // create telemetry context
                 return new TelemetryContext {
+                    Activity = activity,
                     Operation = operation
                 };
             }

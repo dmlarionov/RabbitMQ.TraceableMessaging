@@ -20,8 +20,8 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Options
         public Func<PublishOptions, object, string> GetDependencyName { get; set; } = (PublishOptions publishOptions, object request) =>
         {
             return (!string.IsNullOrEmpty(publishOptions.Exchange)) ? 
-                $"Enqueue to rabbitmq://{publishOptions.RoutingKey} using exchange '{publishOptions.Exchange}'" : 
-                $"Enqueue to rabbitmq://{publishOptions.RoutingKey}";
+                $"Dependency call rabbitmq://{publishOptions.RoutingKey} using exchange '{publishOptions.Exchange}'" : 
+                $"Dependency call rabbitmq://{publishOptions.RoutingKey}";
         };
 
         /// <summary>
@@ -33,8 +33,8 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Options
         public Func<BasicDeliverEventArgs, string> GetRequestName { get; set; } = (ea) =>
         {
             return (!string.IsNullOrEmpty(ea.Exchange)) ?
-                $"Dequeue from rabbitmq://{ea.RoutingKey} using exchange '{ea.Exchange}'" :
-                $"Dequeue from rabbitmq://{ea.RoutingKey}";
+                $"Request from rabbitmq://{ea.RoutingKey} using exchange '{ea.Exchange}'" :
+                $"Request from rabbitmq://{ea.RoutingKey}";
         };
     }
 }
