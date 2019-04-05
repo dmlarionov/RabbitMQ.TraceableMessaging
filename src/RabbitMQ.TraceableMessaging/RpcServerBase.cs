@@ -226,7 +226,8 @@ namespace RabbitMQ.TraceableMessaging
                             ea.Body,
                             _formatOptions,
                             remoteCall.Telemetry,
-                            remoteCall.Security));
+                            remoteCall.Security,
+                            remoteCall.Timeout));
                     }
                     catch(UnauthorizedException e)
                     {
@@ -315,6 +316,7 @@ namespace RabbitMQ.TraceableMessaging
                     ReplyRoutingKey = replyTo,
                     DeliveryTag = deliveryTag,
                     TimeoutTimer = new Timer(TerminateRemoteCall, correlationId, timeout, Timeout.Infinite),
+                    Timeout = timeout,
                     Headers = headers
                 };
 

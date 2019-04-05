@@ -5,7 +5,7 @@ using Microsoft.ApplicationInsights.Extensibility;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.TraceableMessaging.ApplicationInsights.Models;
-using RabbitMQ.TraceableMessaging.Jwt.Models;
+using RabbitMQ.TraceableMessaging.Models;
 using RabbitMQ.TraceableMessaging.Options;
 
 namespace RabbitMQ.TraceableMessaging.ApplicationInsights
@@ -13,7 +13,8 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
     /// <summary>
     /// Asyncronous message consumer with Application Insights telemetry
     /// </summary>
-    public class Consumer : ConsumerBase<TelemetryContext, JwtSecurityContext>
+    public class Consumer<TSecurityContext> : ConsumerBase<TelemetryContext, TSecurityContext>
+        where TSecurityContext : SecurityContext, new()
     {
         /// <summary>
         /// Application Insights telemetry client
@@ -32,7 +33,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
             IModel channel, 
             ConsumeOptions consumeOptions, 
             FormatOptions formatOptions, 
-            SecurityOptions<JwtSecurityContext> securityOptions = null,
+            SecurityOptions<TSecurityContext> securityOptions = null,
             TelemetryClient telemetryClient = null) 
                 : base(channel, consumeOptions, formatOptions, securityOptions)
         {
@@ -75,9 +76,10 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
                 _telemetryClient.TrackException(e);
         }
 
-        protected override void UpdateTelemetryContext(TelemetryContext telemetry, JwtSecurityContext security)
+        protected override void UpdateTelemetryContext(TelemetryContext telemetry, TSecurityContext security)
         {
-            // nothing to do
+            // nothing to do because we don't have telemetry operation
+            // it is not operation it is just a message (no dependency call)
         }
     }
 }

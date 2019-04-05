@@ -28,6 +28,7 @@ namespace RabbitMQ.TraceableMessaging.Jwt.Options
                             tokenValidationParameters,
                             out token);
                     context.ValidatedAccessToken = (JwtSecurityToken)token;
+                    context.AccessTokenEncoded = accessTokenEncoded;
                 }
                 catch(ArgumentException argex)
                 {

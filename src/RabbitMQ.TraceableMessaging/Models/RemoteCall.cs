@@ -36,6 +36,11 @@ namespace RabbitMQ.TraceableMessaging.Models
         public Timer TimeoutTimer { get; set; }
 
         /// <summary>
+        /// Timeout for request
+        /// </summary>
+        public int Timeout { get; set; }
+
+        /// <summary>
         /// Headers of request
         /// </summary>
         public IDictionary<string, object> Headers { get; set; }

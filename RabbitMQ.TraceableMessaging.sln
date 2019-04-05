@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMQ.TraceableMessaging
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMQ.TraceableMessaging.Tests", "tests\RabbitMQ.TraceableMessaging.Tests\RabbitMQ.TraceableMessaging.Tests.csproj", "{55C715ED-F90B-4EA2-ACBB-A557A7AC9651}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMQ.TraceableMessaging.ApplicationInsights.Tests", "tests\RabbitMQ.TraceableMessaging.ApplicationInsights.Tests\RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.csproj", "{8DE62A87-FE57-4DDA-9C2B-AFD36C2F83DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{55C715ED-F90B-4EA2-ACBB-A557A7AC9651}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55C715ED-F90B-4EA2-ACBB-A557A7AC9651}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55C715ED-F90B-4EA2-ACBB-A557A7AC9651}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DE62A87-FE57-4DDA-9C2B-AFD36C2F83DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DE62A87-FE57-4DDA-9C2B-AFD36C2F83DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DE62A87-FE57-4DDA-9C2B-AFD36C2F83DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DE62A87-FE57-4DDA-9C2B-AFD36C2F83DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

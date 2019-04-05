@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -19,7 +20,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
         /// <summary>
         /// Options for tracking dependency
         /// </summary>
-        public TrackDependencyOptions TrackDependencyOptions = new TrackDependencyOptions();
+        public TelemetryOptions TelemetryOptions = new TelemetryOptions();
 
         /// <summary>
         /// Application Insights telemetry client
@@ -73,34 +74,35 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
             TReply response;
 
             // create telemetry operation
-            using (var operation = _telemetryClient.StartOperation<DependencyTelemetry>(TrackDependencyOptions.ExtractOperationName(_publishOptions, request)))
+            using (var operation = _telemetryClient.StartOperation<DependencyTelemetry>(
+                new Activity(TelemetryOptions.GetDependencyName(_publishOptions, request))))
             {
-                // setup telemetry operation
-                operation.Telemetry.Type = "RabbitMQ";
-                operation.Telemetry.Data = TrackDependencyOptions.ExtractDependencyData(_publishOptions, request);
+                // setup telemetry operation type
+                operation.Telemetry.Type = TelemetryOptions.TelemetryType;
 
                 // try execute dependency call
                 try
                 {
                     // setup headers to bind telemetry on receiving side
                     var props = properties ?? _channel.CreateBasicProperties();
-                    
+
                     if (props.Headers == null)
                         props.Headers = new Dictionary<string, object>();
 
                     props.Headers.Add("TelemetryOperationId", operation.Telemetry.Context.Operation.Id);
-                    props.Headers.Add("TelemetryParentOperationId", operation.Telemetry.Id);
-                    props.Headers.Add("TelemetrySource", operation.Telemetry.Target);
+                    props.Headers.Add("TelemetryParentId", operation.Telemetry.Id);
+                    //props.Headers.Add("TelemetrySource", ...); still not supported
                     response = base.GetReply<TReply>(request, accessToken, timeout, props);
-                    
+
                     // set operation.Telemetry success
                     operation.Telemetry.Success = (response.Status == ReplyStatus.Success);
                 }
                 catch (Exception e)
                 {
+                    // FIXME: exception doesn't keep telemetry operation in it's context!
                     if (_telemetryClient.IsEnabled())
                         _telemetryClient.TrackException(e);
-                    
+
                     // request is unsuccessful now
                     operation.Telemetry.Success = false;
 

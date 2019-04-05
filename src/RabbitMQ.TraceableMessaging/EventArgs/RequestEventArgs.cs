@@ -22,7 +22,12 @@ namespace RabbitMQ.TraceableMessaging.EventArgs
         /// Security context for request
         /// </summary>
         public TSecurityContext Security { get; set; }
-        
+
+        /// <summary>
+        /// Timeout for request
+        /// </summary>
+        public int? Timeout { get; set; }
+
         /// <summary>
         /// Constructor of RequestEventArgs
         /// </summary>
@@ -32,7 +37,8 @@ namespace RabbitMQ.TraceableMessaging.EventArgs
             byte[] body,
             FormatOptions formatOptions,
             TTelemetryContext telemetry = null,
-            TSecurityContext security = null)
+            TSecurityContext security = null,
+            int? timeout = null)
                 : base(requestType, body, formatOptions)
         {
             if (string.IsNullOrEmpty(correlationId))
@@ -42,6 +48,7 @@ namespace RabbitMQ.TraceableMessaging.EventArgs
             
             Telemetry = telemetry;
             Security = security;
+            Timeout = timeout;
         }
     }
 }

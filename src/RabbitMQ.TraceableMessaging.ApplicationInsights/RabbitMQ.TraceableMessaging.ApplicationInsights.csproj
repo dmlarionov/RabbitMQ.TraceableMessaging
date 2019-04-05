@@ -11,12 +11,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RabbitMQ.TraceableMessaging\RabbitMQ.TraceableMessaging.csproj" />
-    <ProjectReference Include="..\RabbitMQ.TraceableMessaging.Jwt\RabbitMQ.TraceableMessaging.Jwt.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.ApplicationInsights"/>
-    <PackageReference Include="RabbitMQ.Client"/>
+    <PackageReference Include="Microsoft.ApplicationInsights" />
+    <PackageReference Include="RabbitMQ.Client" />
   </ItemGroup>
 
 </Project>

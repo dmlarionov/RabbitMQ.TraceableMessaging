@@ -15,8 +15,6 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using RabbitMQ.TraceableMessaging.Exceptions;
 using TelemetryContext = RabbitMQ.TraceableMessaging.ApplicationInsights.Models.TelemetryContext;
-using RabbitMQ.TraceableMessaging.Jwt.Models;
-using RabbitMQ.TraceableMessaging.Jwt.Options;
 using System.Security.Claims;
 
 namespace RabbitMQ.TraceableMessaging.ApplicationInsights
@@ -24,12 +22,13 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
     /// <summary>
     /// RPC server with Application Insights telemetry
     /// </summary>
-    public sealed class RpcServer : RabbitMQ.TraceableMessaging.RpcServerBase<TelemetryContext, JwtSecurityContext>
+    public sealed class RpcServer<TSecurityContext> : RpcServerBase<TelemetryContext, TSecurityContext>
+            where TSecurityContext : SecurityContext, new()
     {
         /// <summary>
         /// Options for tracking requests
         /// </summary>
-        public TrackRequestOptions TrackRequestOptions = new TrackRequestOptions();
+        public TelemetryOptions TelemetryOptions = new TelemetryOptions();
 
         /// <summary>
         /// Application Insights telemetry client
@@ -48,7 +47,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
             IModel channel,
             ConsumeOptions consumeOptions,
             FormatOptions formatOptions,
-            JwtSecurityOptions securityOptions = null,
+            SecurityOptions<TSecurityContext> securityOptions = null,
             TelemetryClient telemetryClient = null) : base (channel, consumeOptions, formatOptions, securityOptions)
         {
             // save telemetry client
@@ -63,7 +62,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
         /// <returns>Telemetry context</returns>
         protected override TelemetryContext CreateTelemetryContext(
             BasicDeliverEventArgs ea,
-            RemoteCall<TelemetryContext, JwtSecurityContext> remoteCall)
+            RemoteCall<TelemetryContext, TSecurityContext> remoteCall)
         {
             // extract telemetry operation id
             object _operationId;
@@ -72,26 +71,25 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
                 operationId = Encoding.UTF8.GetString((byte[])_operationId);
             
             // extract telemetry parent operation id
-            object _parentOperationId;
-            string parentOperationId = null;
-            if (remoteCall.Headers.TryGetValue("TelemetryParentOperationId", out _parentOperationId))
-                parentOperationId = Encoding.UTF8.GetString((byte[])_parentOperationId);
-            
+            object _parentId;
+            string parentId = null;
+            if (remoteCall.Headers.TryGetValue("TelemetryParentId", out _parentId))
+                parentId = Encoding.UTF8.GetString((byte[])_parentId);
+
             // extract telemetry source
             object _source;
             string source = null;
             if (remoteCall.Headers.TryGetValue("TelemetrySource", out _source))
                 source = Encoding.UTF8.GetString((byte[])_source);
-            
+
             // start telemetry operation
             if (_telemetryClient.IsEnabled() &&
-                operationId != null &&
-                parentOperationId != null &&
-                source != null)
+                operationId != null)
             {
                 // start telemetry operation
-                var operation = _telemetryClient.StartOperation<RequestTelemetry>(TrackRequestOptions.ExtractOperationName(ea), operationId, parentOperationId);
+                var operation = _telemetryClient.StartOperation<RequestTelemetry>(TelemetryOptions.GetRequestName(ea), operationId, parentId);
 
+                // support source here (currently not supported by RpcClient)
                 if (!string.IsNullOrEmpty(source))
                     operation.Telemetry.Source = source;
 
@@ -115,13 +113,16 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
         /// <param name="security">Security context</param>
         protected override void UpdateTelemetryContext(
             TelemetryContext telemetry,
-            JwtSecurityContext security)
+            TSecurityContext security)
         {
             // add security properties to telemetry operation
             if (_telemetryClient.IsEnabled() && telemetry != null)
             {
-                telemetry.Operation.Telemetry.Properties.Add("AccessTokenIssuer", security.ValidatedAccessToken.Issuer);
-                telemetry.Operation.Telemetry.Properties.Add("AccessTokenSubject", security.ValidatedAccessToken.Subject);
+                if (security.AccessTokenIssuer != null)
+                    telemetry.Operation.Telemetry.Properties.Add("AccessTokenIssuer", security.AccessTokenIssuer);
+
+                if (security.Principal?.Identity?.Name != null)
+                    telemetry.Operation.Telemetry.Properties.Add("Principal.Identity.Name", security.Principal.Identity.Name);
             }
         }
 
@@ -215,7 +216,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
         protected override void TerminateRemoteCall(string correlationId)
         {
             // get remote call (will succeed only once for particular correlationId)
-            RemoteCall<TelemetryContext, JwtSecurityContext> call;
+            RemoteCall<TelemetryContext, TSecurityContext> call;
             if (_remoteCalls.TryRemove(correlationId, out call))
             {
                 // asknowlege request message if it was not done automatically upon receive

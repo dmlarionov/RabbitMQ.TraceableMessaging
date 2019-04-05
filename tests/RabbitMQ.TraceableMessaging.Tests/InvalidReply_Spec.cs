@@ -17,13 +17,13 @@ namespace RabbitMQ.TraceableMessaging.Tests
         }
 
         [Fact]
-        public void WrongType()
+        public void WrongContentType()
         {
             Assert.Throws<InvalidReplyException>(() => Fixture.Client.GetReply<Pong1>(new Ping1()));
         }
 
         [Fact]
-        public void WrongEncoding()
+        public void WrongContentEncoding()
         {
             Assert.Throws<InvalidReplyException>(() => Fixture.Client.GetReply<Pong2>(new Ping2()));
         }

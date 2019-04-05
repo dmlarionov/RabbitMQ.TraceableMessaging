@@ -13,13 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="RabbitMQ.Client" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\..\src\RabbitMQ.TraceableMessaging.ApplicationInsights\RabbitMQ.TraceableMessaging.ApplicationInsights.csproj" />
     <ProjectReference Include="..\..\src\RabbitMQ.TraceableMessaging.Json\RabbitMQ.TraceableMessaging.Json.csproj" />
-    <ProjectReference Include="..\..\src\RabbitMQ.TraceableMessaging.YamlDotNet\RabbitMQ.TraceableMessaging.YamlDotNet.csproj" />
-    <ProjectReference Include="..\..\src\RabbitMQ.TraceableMessaging\RabbitMQ.TraceableMessaging.csproj" />
   </ItemGroup>
 
 </Project>

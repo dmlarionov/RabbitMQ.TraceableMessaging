@@ -14,11 +14,11 @@ namespace RabbitMQ.TraceableMessaging.Tests.Fixtures
 {
     public class PingPongFixture<TFormatOptions> : IDisposable where TFormatOptions : FormatOptions, new()
     {
-        public IConnection ServerConnection { get; private set; }
+        public IConnection Connection { get; private set; }
+
         public IModel ServerChannel { get; private set; }
         public TestRpcServerBase Server { get; private set; }
 
-        public IConnection ClientConnection { get; private set; }
         public IModel ClientChannel { get; private set; }
         public TestRpcClientBase Client { get; private set; }
 
@@ -26,20 +26,13 @@ namespace RabbitMQ.TraceableMessaging.Tests.Fixtures
 
         public PingPongFixture()
         {
-            var connFactory = new ConnectionFactory() {
-                HostName = "localhost",
-                Port = 5672,
-                UserName = "guest",
-                Password = "guest",
-                VirtualHost = "/"
-            };
+            Connection = Utility.CreateConnection();
             var requestQueueName = Guid.NewGuid().ToString();
             var replyQueueName = Guid.NewGuid().ToString();
 
             {
                 // configure connection & channel for RPC server
-                ServerConnection = connFactory.CreateConnection();
-                ServerChannel = ServerConnection.CreateModel();
+                ServerChannel = Connection.CreateModel();
 
                 // declare request queue
                 ServerChannel.QueueDeclare(requestQueueName, false, true, true);
@@ -53,8 +46,7 @@ namespace RabbitMQ.TraceableMessaging.Tests.Fixtures
 
             {
                 // configure connection & channel for RPC client
-                ClientConnection = connFactory.CreateConnection();
-                ClientChannel = ServerConnection.CreateModel();
+                ClientChannel = Connection.CreateModel();
 
                 // declare reply queue
                 ClientChannel.QueueDeclare(replyQueueName, false, true, true);
@@ -102,8 +94,7 @@ namespace RabbitMQ.TraceableMessaging.Tests.Fixtures
         public void Dispose()
         {
             Server.Received -= Pong;
-            ServerConnection.Dispose();
-            ClientConnection.Dispose();
+            Connection.Dispose();
         }
     }
 }

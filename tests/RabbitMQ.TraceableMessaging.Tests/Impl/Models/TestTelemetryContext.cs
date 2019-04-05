@@ -6,6 +6,5 @@ namespace RabbitMQ.TraceableMessaging.Tests.Impl.Models
 {
     public class TestTelemetryContext
     {
-        public string UserIdentity { get; set; }
     }
 }

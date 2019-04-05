@@ -6,5 +6,6 @@ namespace RabbitMQ.TraceableMessaging.Jwt.Models
     public class JwtSecurityContext : SecurityContext
     {
         public JwtSecurityToken ValidatedAccessToken { get; set; }
+        public override string AccessTokenIssuer => ValidatedAccessToken.Issuer;
     }
 }
