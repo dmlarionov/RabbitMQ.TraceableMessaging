@@ -27,22 +27,6 @@ steps:
     command: 'build'
     arguments: '-c $(buildConfiguration)'
 
-# - task: Docker@1
-#   displayName: Login to Docker Hub
-#   inputs:
-#     command: login
-#     containerregistrytype: 'Container Registry'
-#     dockerRegistryEndpoint: 'DockerHub'
-
-# - task: Docker@1
-#   displayName: Pull RabbitMQ from Docker Hub
-#   inputs:
-#     command: pull
-#     arguments: 'rabbitmq'
-#     containerregistrytype: 'Container Registry'
-#     dockerRegistryEndpoint: 'DockerHub'
-
-# DockerCompose@0 doesn pull image if needed
 - task: DockerCompose@0
   displayName: Start RabbitMQ
   inputs:
@@ -51,7 +35,6 @@ steps:
     projectName: $(Build.Repository.Name)
     containerregistrytype: 'Container Registry'
     dockerRegistryEndpoint: 'DockerHub'
-    #dockerComposeCommand: up
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test -c $(buildConfiguration)'
@@ -70,14 +53,6 @@ steps:
     dockerRegistryEndpoint: 'DockerHub'
     dockerComposeCommand: down
 
-# - task: Docker@1
-#   displayName: Logout from Docker Hub
-#   condition: always()
-#   inputs:
-#     command: logout
-#     containerregistrytype: 'Container Registry'
-#     dockerRegistryEndpoint: 'DockerHub'
-
 - task: DotNetCoreCLI@2
   displayName: 'dotnet pack -c $(buildConfiguration) --no-build'
   inputs:
@@ -85,14 +60,11 @@ steps:
     configurationToPack: '$(buildConfiguration)'
     packagesToPack: 'src/**/*.csproj' # Required with pack command
     packDirectory: '$(build.artifactStagingDirectory)'
-    nobuild: true # Already built on previous step
+    nobuild: true   # Code is already built on previous step
     versioningScheme: 'byBuildNumber'
     verbosityPack: 'normal'
 
-# Pulish NuGet packages to public NuGet Gallery
-- task: NuGetCommand@2
+- task: PublishBuildArtifacts@1
   inputs:
-    command: push
-    nuGetFeedType: external
-    publishFeedCredentials: 'NuGet'
-    packagesToPush: '$(build.artifactStagingDirectory)/*.nupkg'
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+    artifactName: 'packages' 
