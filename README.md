@@ -93,7 +93,7 @@ public sealed class Service : IDisposable
 				
 				// any other case explores in the end
 				default:
-					throw new Exception("Unsupported request type!");
+				throw new Exception("Unsupported request type!");
 			}
 		}
 		catch(Exception e)
