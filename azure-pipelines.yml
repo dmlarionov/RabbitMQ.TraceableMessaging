@@ -88,3 +88,11 @@ steps:
     nobuild: true # Already built on previous step
     versioningScheme: 'byBuildNumber'
     verbosityPack: 'normal'
+
+# Pulish NuGet packages to public NuGet Gallery
+- task: NuGetCommand@2
+  inputs:
+    command: push
+    nuGetFeedType: external
+    publishFeedCredentials: 'NuGet.org'
+    packagesToPush: '$(build.artifactStagingDirectory)/*.nupkg'
