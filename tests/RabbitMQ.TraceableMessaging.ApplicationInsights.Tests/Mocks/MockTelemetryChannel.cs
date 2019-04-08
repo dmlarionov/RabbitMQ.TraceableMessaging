@@ -1,5 +1,6 @@
 ﻿using Microsoft.ApplicationInsights.Channel;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,11 +8,11 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Mocks
 {
     public class MockTelemetryChannel : ITelemetryChannel
     {
-        public IList<ITelemetry> Items
+        public ConcurrentBag<ITelemetry> Items
         {
             get;
             private set;
-        } = new List<ITelemetry>();
+        } = new ConcurrentBag<ITelemetry>();
 
         public bool? DeveloperMode { get => null; set { } }
 

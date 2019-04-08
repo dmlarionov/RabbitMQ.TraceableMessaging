@@ -28,7 +28,7 @@ namespace RabbitMQ.TraceableMessaging.Tests
         [Fact]
         public async Task NoTimeout()
         {
-            await Fixture.Client.GetReplyAsync<Pong1>(new Ping1(), timeout: 150);
+            await Fixture.Client.GetReplyAsync<Pong1>(new Ping1(), timeout: 250);
         }
     }
 }
