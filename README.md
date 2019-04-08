@@ -292,10 +292,10 @@ RpcServer = new RpcServer<JwtSecurityContext>(
 
 Done! You have protected your API over RabbitMQ.
 
-### Skipping authorization
+## Usage without authorization
 
-If you don't need authorization at all then create your own stub implementation of `RabbitMQ.TraceableMessaging.Models.SecurityContext` or just use `RabbitMQ.TraceableMessaging.Jwt` as type parameter without passing `SecurityOptions` to `RpcServer<..>` constructor.
+If you don't need authorization at all then create your own stub implementation of `RabbitMQ.TraceableMessaging.Models.SecurityContext` or just use `RabbitMQ.TraceableMessaging.Jwt` as type parameter without passing any `SecurityOptions` to `RpcServer<..>` constructor.
 
-If you have already implemented RPC without authorization (as shown above), but you are going to extend that service with security while keeping backward compatibility, then use `SecurityOptions.SkipForRequestTypes` collection for request types that have to stay unprotected.
+If you have already implemented RPC without authorization (as shown above), but you are going to extend your service with security while keeping backward compatibility, then use `SecurityOptions.SkipForRequestTypes` collection for request types that have to stay unprotected.
 
-If you need a service that serves a public and protected request types then you can use `SecurityOptions.SkipForRequestTypes` for public request types.
+If you need a service that serves a public and protected request types then you can put your public request types into `SecurityOptions.SkipForRequestTypes`.
