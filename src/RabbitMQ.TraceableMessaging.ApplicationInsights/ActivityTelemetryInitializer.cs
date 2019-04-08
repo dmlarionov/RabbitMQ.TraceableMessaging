@@ -7,13 +7,17 @@ using System.Text;
 
 namespace RabbitMQ.TraceableMessaging.ApplicationInsights
 {
+    /// <summary>
+    /// Initialize telemetry context (if not initialized) using system diagnostic activity.
+    /// This is useful for binding of exceptions during RPC call to RPC call context.
+    /// </summary>
     public class ActivityTelemetryInitializer : ITelemetryInitializer
     {
         public void Initialize(ITelemetry telemetry)
         {
             var operation = telemetry.Context.Operation;
 
-            // if telemetry item (for instance exception) is not related to operation
+            // if telemetry item (e.g. exception) is not related to operation
             if (operation.Id == null && operation.ParentId == null)
             {
                 // try linking it using diagnostic activity

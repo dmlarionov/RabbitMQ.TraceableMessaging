@@ -35,7 +35,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests
             var third = items.Where(i => i.Context.Operation.ParentId == second.Id &&
                 i.Context.Operation.Id == first.Context.Operation.Id).First() as RequestTelemetry;
 
-            return third != null && items.Count == 3;
+            return third != null && items.Where(i => i.Context.Operation.Id == first.Context.Operation.Id).Count() == 3;
         }
 
         [Fact]
@@ -70,7 +70,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests
             var third = items.Where(i => i.Context.Operation.ParentId == second.Id &&
                 i.Context.Operation.Id == first.Context.Operation.Id).First() as RequestTelemetry;
 
-            return third != null && items.Count == 4;
+            return third != null && items.Where(i => i.Context.Operation.Id == first.Context.Operation.Id).Count() == 4;
         }
 
         [Fact]
@@ -99,17 +99,19 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests
 
             var first = items.Where(i => i.Context.Operation.Name == operationName).First() as RequestTelemetry;
             var second = items.Where(i => i.Context.Operation.ParentId == first.Id &&
-                i.Context.Operation.Id == first.Context.Operation.Id).First() as DependencyTelemetry;
+                i.Context.Operation.Id == first.Context.Operation.Id && 
+                i.GetType().Name == "DependencyTelemetry").First() as DependencyTelemetry;
             var exception_at_second = items.Where(i => i.Context.Operation.ParentId == first.Id &&
                 i.Context.Operation.Id == first.Context.Operation.Id &&
                 i.GetType().Name == "ExceptionTelemetry").First() as ExceptionTelemetry;
             var third = items.Where(i => i.Context.Operation.ParentId == second.Id &&
-                i.Context.Operation.Id == first.Context.Operation.Id).First() as RequestTelemetry;
+                i.Context.Operation.Id == first.Context.Operation.Id &&
+                i.GetType().Name == "RequestTelemetry").First() as RequestTelemetry;
             var exception_at_third = items.Where(i => i.Context.Operation.ParentId == second.Id &&
                 i.Context.Operation.Id == first.Context.Operation.Id &&
                 i.GetType().Name == "ExceptionTelemetry").First() as ExceptionTelemetry;
 
-            return third != null && items.Count == 5;
+            return third != null && items.Where(i => i.Context.Operation.Id == first.Context.Operation.Id).Count() == 5;
         }
 
         [Fact]
