@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/dlar/RabbitMQ.TraceableMessaging/_apis/build/status/dmlarionov.RabbitMQ.TraceableMessaging?branchName=master)](https://dev.azure.com/dlar/RabbitMQ.TraceableMessaging/_build/latest?definitionId=5&branchName=master)
+
 # RabbitMQ.TraceableMessaging
 ## Overview
 
@@ -51,65 +53,64 @@ public sealed class Service : IDisposable
 		
 		// create channel over RabbitMQ connection
 		Channel = conn.CreateModel();
-        
-        // declare request queue
-        Channel.QueueDeclare("service_queue_name");
+		
+		// declare request queue
+		Channel.QueueDeclare("service_queue_name");
+		
+		// configure consume options
+		var consumeOptions = new ConsumeOptions();
+		consumeOptions.Queue = "service_queue_name";
+		
+		// create RPC server instance
+		RpcServer = new RpcServer<JwtSecurityContext>(
+			Channel,
+			consumeOptions, 
+			new JsonFormatOptions(),
+			null,	// null - skip token validation and authorization
+			TelemetryClient);
+		
+		// subscribe to events
+		RpcServer.Received += OnReceive;
+	}
+	
+	void OnReceive(object sender, RequestEventArgs<TelemetryContext, JwtSecurityContext> ea)
+	{
+		try
+		{
+			switch (ea.RequestType)
+			{
+				// Request A
+				case nameof(RequestA):
+				...	// create reply for request A
+				Server.Reply(ea.CorrelationId, reply);
+				break;
+				
+				// Request B
+				case nameof(RequestB):
+				...	// create reply for request B
+				Server.Reply(ea.CorrelationId, reply);
+				break;
+				
+				// any other case explores in the end
+				default:
+				throw new Exception("Unsupported request type!");
+			}
+		}
+		catch(Exception e)
+		{
+			// track exception on server side to telemetry
+			TelemetryClient.TrackException(e);
+			
+			// reply with failure
+			RpcServer.Reply(ea.CorrelationId, new Reply { Status = ReplyStatus.Fail });
+		}
+	}
 
-        // configure consume options
-        var consumeOptions = new ConsumeOptions();
-        consumeOptions.Queue = "service_queue_name";
-
-        // create RPC server instance
-        RpcServer = new RpcServer<JwtSecurityContext>(
-            Channel,
-            consumeOptions, 
-            new JsonFormatOptions(),
-            null,	// null - skip token validation and authorization
-            TelemetryClient);
-
-        // subscribe to events
-        RpcServer.Received += OnReceive;
-    }
-
-    void OnReceive(object sender, RequestEventArgs<TelemetryContext, JwtSecurityContext> ea)
-    {
-        try
-        {
-            switch (ea.RequestType)
-            {
-                // Request A
-                case nameof(RequestA):
-                    ...	// create reply for request A
-                    Server.Reply(ea.CorrelationId, reply);
-                    break;
-
-                // Request B
-                case nameof(RequestB):
-                	...	// create reply for request B
-                    Server.Reply(ea.CorrelationId, reply);
-                    break;
-
-                // any other case explores in the end
-                default:
-                    throw new Exception("Unsupported request type!");
-            }
-        }
-        catch(Exception e)
-        {
-            // track exception on server side to telemetry
-            TelemetryClient.TrackException(e);
-
-            // reply with failure
-            RpcServer.Reply(ea.CorrelationId, new Reply { Status = ReplyStatus.Fail });
-        }
-    }
-    
-}
-
-public void Dispose()
-{
-    RpcServer.Dispose();
-    Channel.Dispose();
+	public void Dispose()
+	{
+		RpcServer.Dispose();
+		Channel.Dispose();
+	}
 }
 ```
 
@@ -137,41 +138,42 @@ public sealed class Client : IDisposable
 		
 		// create channel over RabbitMQ connection
 		Channel = conn.CreateModel();
-        
-        // declare response queue
-        responseQueue = "reply-to-" + $"{Guid.NewGuid().ToString()}";
-        Channel.QueueDeclare(
+		
+		// declare response queue
+		responseQueue = "reply-to-" + $"{Guid.NewGuid().ToString()}";
+		Channel.QueueDeclare(
 			queue: responseQueue,
 			durable: false,
 			exclusive: true,
 			autoDelete: true);
 		
 		// configure publish options
-        var publishOptions = new PublishOptions();
-        publishOptions.RoutingKey = "service_queue_name";
-        
-        // configure consume options
+		var publishOptions = new PublishOptions();
+		publishOptions.RoutingKey = "service_queue_name";
+		
+		// configure consume options
 		var consumeOptions = new ConsumeOptions();
 		consumeOptions.AutoAck = true;
 		consumeOptions.Queue = responseQueue;
 		
-        // create RPC client instance
-        RpcClient = new RpcClient(
-            Channel,
-            publishOptions,
-            consumeOptions, 
-            new JsonFormatOptions(),
-            TelemetryClient);
+		// create RPC client instance
+		RpcClient = new RpcClient(
+			Channel,
+			publishOptions,
+			consumeOptions, 
+			new JsonFormatOptions(),
+			TelemetryClient);
+		}
 	}
-}
-
-public void Dispose()
-{
-    Channel.Dispose();
+	
+	public void Dispose()
+	{
+		Channel.Dispose();
+	}
 }
 ```
 
-Simplest requesting to service on client side looks like:
+Simplest request to service on client side looks like:
 
 ```csharp
 var request = new RequestA();
@@ -224,7 +226,7 @@ public AuthzResult AuthorizeFunc(string requestType, JwtSecurityContext context)
 	string checkScope;
 	if (!Map.TryGetValue(requestType, out checkScope))
 		return new AuthzResult(false, $"No scope defined for {requestType}");
-    
+	
 	if (context.Principal.Claims.Where(c => c.Type == "scope" && c.Value == checkScope).Any())
 		return new AuthzResult(true);	// permitted
 	else
@@ -281,19 +283,19 @@ var options = new JwtSecurityOptions(p)	// p is TokenValidationParameters
 
 // create RPC server instance
 RpcServer = new RpcServer<JwtSecurityContext>(
-    Channel,
-    consumeOptions, 
-    new JsonFormatOptions(),
-    JwtSecurityOptions,	// validate token and authorize
-    TelemetryClient);
+	Channel,
+	consumeOptions, 
+	new JsonFormatOptions(),
+	JwtSecurityOptions,	// validate token and authorize
+	TelemetryClient);
 ```
 
 Done! You have protected your API over RabbitMQ.
 
-### Skipping authorization
+## Usage without authorization
 
-If you don't need authorization at all then create your own stub implementation of `RabbitMQ.TraceableMessaging.Models.SecurityContext` or just use `RabbitMQ.TraceableMessaging.Jwt` as type parameter without passing `SecurityOptions` to `RpcServer<..>` constructor.
+If you don't need authorization at all then create your own stub implementation of `RabbitMQ.TraceableMessaging.Models.SecurityContext` or just use `RabbitMQ.TraceableMessaging.Jwt` as type parameter without passing any `SecurityOptions` to `RpcServer<..>` constructor.
 
-If you have already implemented RPC without authorization (as shown above), but you are going to extend that service with security while keeping backward compatibility, then use `SecurityOptions.SkipForRequestTypes` collection for request types that have to stay unprotected.
+If you have already implemented RPC without authorization (as shown above), but you are going to extend your service with security while keeping backward compatibility, then use `SecurityOptions.SkipForRequestTypes` collection for request types that have to stay unprotected.
 
-If you need a service that serves a public and protected request types then you can use `SecurityOptions.SkipForRequestTypes` for public request types.
+If you need a service that serves a public and protected request types then you can put your public request types into `SecurityOptions.SkipForRequestTypes`.
