@@ -47,15 +47,17 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests
                 var task = Fixture.GetReplyAsync<Pong1>(new Ping1());
                 Telemetry.StopOperation(operation);
                 return task;
-            }).ContinueWith(task =>
+            })
+            .ContinueWith(task =>
             {
+                Fixture.FlushTelemetry();
+                Task.Delay(500).Wait();
                 Assert.True(task.Result.GetType().Name == nameof(Pong1));
                 Assert.True(_chaincheck1(operationName));
             });
         }
 
-        // FIXME: something wrong with fact that exception_at_second linked to first.Id
-        // FIXME: pass when run alone, but fail when run whole spec
+        // FIXME: may be exception should be linked UNDER request / dependency (not at the same level)
         private bool _chaincheck2(string operationName)
         {
             var items = Fixture.TelemetryChannel.Items;
@@ -83,16 +85,17 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests
                 var task = Fixture.GetReplyAsync<Pong2>(new Ping2());
                 Telemetry.StopOperation(operation);
                 return task;
-            }).ContinueWith(task =>
+            })
+            .ContinueWith(task =>
             {
-                var fixture = Fixture;
+                Fixture.FlushTelemetry();
+                Task.Delay(500).Wait();
                 Assert.ThrowsAsync<InvalidReplyException>(() => task);
                 Assert.True(_chaincheck2(operationName));
             });
         }
 
-        // FIXME: something wrong with fact that exception_at_second linked to first.Id
-        // and exception_at_third linked to second.Id
+        // FIXME: may be exception should be linked UNDER request / dependency (not at the same level)
         private bool _boomchaincheck(string operationName)
         {
             var items = Fixture.TelemetryChannel.Items;
@@ -124,9 +127,11 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests
                 var task = Fixture.GetReplyAsync<Pong2>(new object());
                 Telemetry.StopOperation(operation);
                 return task;
-            }).ContinueWith(task =>
+            })
+            .ContinueWith(task =>
             {
-                var fixture = Fixture;
+                Fixture.FlushTelemetry();
+                Task.Delay(500).Wait();
                 Assert.ThrowsAsync<InvalidReplyException>(() => task);
                 Assert.True(_boomchaincheck(operationName));
             });

@@ -30,17 +30,18 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Fixtures
         /// </summary>
         public class Item
         {
+            public TelemetryClient TelemetryClient { get; set; }
+
             public IConnection Connection { get; private set; }
 
             public IModel ServerChannel { get; private set; }
             public RpcServer<TestSecurityContext> Server { get; private set; }
-            private TelemetryClient ServerTelemetryClient { get; set; }
 
             public IModel DependencyChannel { get; private set; }
             public RpcClient DependencyClient { get; private set; }
 
             public string Queue { get; private set; }
-            private Item Dependency { get; set; }
+            public Item Dependency { get; set; }
 
             /// <summary>
             /// Create chain item
@@ -58,6 +59,9 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Fixtures
 
                 Connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
+                // configure telemetry client
+                TelemetryClient = Utility.GetTelemetryClient(telemetryChannel);
+
                 {
                     // configure connection & channel for RPC server
                     ServerChannel = Connection.CreateModel();
@@ -69,15 +73,12 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Fixtures
                     var consumeOptions = new ConsumeOptions();
                     consumeOptions.Queue = queue;
 
-                    // configure server telemetry client
-                    ServerTelemetryClient = Utility.GetTelemetryClient(telemetryChannel);
-
                     Server = new RpcServer<TestSecurityContext>(
                         ServerChannel,
                         consumeOptions,
                         new TFormatOptions(),
                         null,
-                        ServerTelemetryClient);
+                        TelemetryClient);
                 }
 
                 if (dependency != null)
@@ -103,7 +104,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Fixtures
                         publishOptions,
                         consumeOptions,
                         new TFormatOptions(),
-                        Utility.GetTelemetryClient(telemetryChannel));
+                        TelemetryClient);
                 }
 
                 Server.Received += ForwardOrPong;
@@ -147,7 +148,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Fixtures
                 catch(Exception e)
                 {
                     // track exceptions on server side
-                    ServerTelemetryClient.TrackException(e);
+                    TelemetryClient.TrackException(e);
                     Server.Reply(ea.CorrelationId, new Reply { Status = ReplyStatus.Fail });
                 }
             }
@@ -176,6 +177,16 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Fixtures
             for (int i = 0; i < 2; i++)
                 item = new Item(Connection, TelemetryChannel, Guid.NewGuid().ToString(), item);
             Root = item;
+        }
+
+        public void FlushTelemetry()
+        {
+            var item = Root;
+            while(item != null)
+            {
+                item.TelemetryClient.Flush();
+                item = item.Dependency;
+            }
         }
 
         public Task<TReply> GetReplyAsync<TReply>(
