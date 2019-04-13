@@ -21,12 +21,6 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet build -c $(buildConfiguration)'
-  inputs:
-    command: 'build'
-    arguments: '-c $(buildConfiguration)'
-
 - task: DockerCompose@0
   displayName: Start RabbitMQ
   inputs:
@@ -35,6 +29,12 @@ steps:
     projectName: $(Build.Repository.Name)
     containerregistrytype: 'Container Registry'
     dockerRegistryEndpoint: 'DockerHub'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build -c $(buildConfiguration)'
+  inputs:
+    command: 'build'
+    arguments: '-c $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test -c $(buildConfiguration) --no-build'
