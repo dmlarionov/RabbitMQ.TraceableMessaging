@@ -37,10 +37,10 @@ steps:
     dockerRegistryEndpoint: 'DockerHub'
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet test -c $(buildConfiguration)'
+  displayName: 'dotnet test -c $(buildConfiguration) --no-build'
   inputs:
     command: 'test'
-    arguments: '-c $(buildConfiguration)'
+    arguments: '-c $(buildConfiguration) --no-build'
 
 - task: DockerCompose@0
   displayName: Stop RabbitMQ
@@ -54,15 +54,11 @@ steps:
     dockerComposeCommand: down
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet pack -c $(buildConfiguration) --no-build'
+  displayName: 'dotnet pack -c $(buildConfiguration) --no-build --include-symbols'
   inputs:
-    command: 'pack'
-    configurationToPack: '$(buildConfiguration)'
-    packagesToPack: 'src/**/*.csproj' # Required with pack command
-    packDirectory: '$(build.artifactStagingDirectory)'
-    nobuild: true   # Code is already built on previous step
-    versioningScheme: 'byBuildNumber'
-    verbosityPack: 'normal'
+    command: 'custom'
+    custom: 'pack'
+    arguments: '-c $(buildConfiguration) --no-build --include-symbols --output $(build.artifactStagingDirectory) /p:PackageVersion=$(build.buildNumber)'
 
 - task: PublishBuildArtifacts@1
   inputs:
