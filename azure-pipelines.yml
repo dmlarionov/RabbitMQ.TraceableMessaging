@@ -58,7 +58,7 @@ steps:
   inputs:
     command: 'custom'
     custom: 'pack'
-    arguments: '-c $(buildConfiguration) --no-build --include-symbols --output $(build.artifactStagingDirectory) /p:PackageVersion=$(build.buildNumber)'
+    arguments: '-c $(buildConfiguration) --no-build --include-symbols --output $(build.artifactStagingDirectory) /p:PackageVersion=$(build.buildNumber) -p:SymbolPackageFormat=snupkg'
 
 - task: PublishBuildArtifacts@1
   inputs:
