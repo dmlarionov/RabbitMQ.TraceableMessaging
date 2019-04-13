@@ -92,12 +92,9 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights.Tests.Fixtures
                     DependencyChannel.QueueDeclare(replyQueueName, false, true, true);
 
                     // configure RPC client
-                    var publishOptions = new PublishOptions();
-                    publishOptions.Exchange = "";
-                    publishOptions.RoutingKey = dependency.Queue;
+                    var publishOptions = new PublishOptions(dependency.Queue);
 
-                    var consumeOptions = new ConsumeOptions();
-                    consumeOptions.Queue = replyQueueName;
+                    var consumeOptions = new ConsumeOptions(replyQueueName);
 
                     DependencyClient = new RpcClient(
                         ServerChannel,

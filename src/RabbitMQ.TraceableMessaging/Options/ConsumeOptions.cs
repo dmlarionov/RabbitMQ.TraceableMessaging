@@ -4,5 +4,7 @@ namespace RabbitMQ.TraceableMessaging.Options
     {
         public string Queue { get; set; }
         public bool AutoAck { get; set; } = false;
+        public ConsumeOptions() { }
+        public ConsumeOptions(string queue) => Queue = queue;
     }
 }
