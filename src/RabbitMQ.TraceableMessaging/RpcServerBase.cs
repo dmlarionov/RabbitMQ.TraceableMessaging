@@ -540,6 +540,22 @@ namespace RabbitMQ.TraceableMessaging
         }
 
         /// <summary>
+        /// Track exception to telemetry and reply according to exception type.
+        /// By using this in try .. catch you create correct reply if dependency throws exception.
+        /// </summary>
+        /// <param name="e"></param>
+        public void Fail(RequestEventArgs<TTelemetryContext, TSecurityContext> ea, Exception e)
+        {
+            TrackException(e);
+            if (e.GetType() == typeof(UnauthorizedException))
+                ReplyWithUnauthorized(ea.CorrelationId, ea.Telemetry, e.Message);
+            else if (e.GetType() == typeof(ForbiddenException))
+                ReplyWithForbidden(ea.CorrelationId, ea.Telemetry, e.Message);
+            else
+                ReplyWithFail(ea.CorrelationId, ea.Telemetry, e.Message);
+        }
+
+        /// <summary>
         /// Disposing timeout timers
         /// </summary>
         public void Dispose()
