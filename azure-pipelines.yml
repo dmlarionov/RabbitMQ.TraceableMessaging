@@ -21,12 +21,6 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet build -c $(buildConfiguration)'
-  inputs:
-    command: 'build'
-    arguments: '-c $(buildConfiguration)'
-
 - task: DockerCompose@0
   displayName: Start RabbitMQ
   inputs:
@@ -37,10 +31,16 @@ steps:
     dockerRegistryEndpoint: 'DockerHub'
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet test -c $(buildConfiguration)'
+  displayName: 'dotnet build -c $(buildConfiguration)'
+  inputs:
+    command: 'build'
+    arguments: '-c $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet test -c $(buildConfiguration) --no-build'
   inputs:
     command: 'test'
-    arguments: '-c $(buildConfiguration)'
+    arguments: '-c $(buildConfiguration) --no-build'
 
 - task: DockerCompose@0
   displayName: Stop RabbitMQ
@@ -54,15 +54,11 @@ steps:
     dockerComposeCommand: down
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet pack -c $(buildConfiguration) --no-build'
+  displayName: 'dotnet pack -c $(buildConfiguration) --no-build --include-symbols'
   inputs:
-    command: 'pack'
-    configurationToPack: '$(buildConfiguration)'
-    packagesToPack: 'src/**/*.csproj' # Required with pack command
-    packDirectory: '$(build.artifactStagingDirectory)'
-    nobuild: true   # Code is already built on previous step
-    versioningScheme: 'byBuildNumber'
-    verbosityPack: 'normal'
+    command: 'custom'
+    custom: 'pack'
+    arguments: '-c $(buildConfiguration) --no-build --include-symbols --output $(build.artifactStagingDirectory) /p:PackageVersion=$(build.buildNumber) -p:SymbolPackageFormat=snupkg'
 
 - task: PublishBuildArtifacts@1
   inputs:

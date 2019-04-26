@@ -20,7 +20,7 @@ Repository contains:
 
 ## How to use
 
-In service and in client project reference to:
+In your service and client projects add references to:
 
 - `RabbitMQ.TraceableMessaging` package.
 - One of serialization packages (otherwise you may use `RabbitMQ.TraceableMessaging.Options.FormatOptions` class with your delegates and `ContentType` value assigned).
