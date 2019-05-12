@@ -25,7 +25,7 @@ The repository contains:
 In your service and client projects add references to:
 
 - `RabbitMQ.TraceableMessaging` package.
-- Serialization package (`RabbitMQ.TraceableMessaging.Json` or `RabbitMQ.TraceableMessaging.YamlDotNet`).
+- `RabbitMQ.TraceableMessaging.Json` or `RabbitMQ.TraceableMessaging.YamlDotNet`.
 - `RabbitMQ.TraceableMessaging.ApplicationInsights` or your own implementation.
 - `RabbitMQ.TraceableMessaging.Jwt` or your own implementation.
 
@@ -158,7 +158,7 @@ For authorized request pass access token as an argument to `RpcClient.GetReply<R
 Exceptions defined in namespace `RabbitMQ.TraceableMessaging.Exceptions` can be thrown:
 
 - `ForbiddenException` - The server understood the request but refuses to authorize it. Equivalent of HTTP 403.
-- `UnauthorizedException` - The request lacks authentication credentials. Like HTTP 401. Should lead to authorization round trip.
+- `UnauthorizedException` - Lacks of valid authorization token. Like HTTP 401. Should lead to authorization round trip.
 - `RequestFailureException` - The server cannot process due to something. Like HTTP 500.
 - `InvalidReplyException` - The client can't read the response.
 
