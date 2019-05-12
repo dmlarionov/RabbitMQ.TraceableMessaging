@@ -12,7 +12,7 @@ Learn how you can benefit from this at [example project](https://github.com/dmla
 
 ## Projects
 
-The repository contains:
+The source folder contains:
 
 1. `RabbitMQ.TraceableMessaging` - core library.
 2. `RabbitMQ.TraceableMessaging.ApplicationInsights` - implementation for Application Insights.
