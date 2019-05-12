@@ -65,13 +65,13 @@ public sealed class MyService
 				// Request A
 				case nameof(RequestA):
 					...	// do job for request A
-					Server.Reply(ea.CorrelationId, reply);
+					RpcServer.Reply(ea.CorrelationId, reply);
 					break;
 				
 				// Request B
 				case nameof(RequestB):
 					...	// do job for request B
-					Server.Reply(ea.CorrelationId, reply);
+					RpcServer.Reply(ea.CorrelationId, reply);
 					break;
 				
 				// Other request type
