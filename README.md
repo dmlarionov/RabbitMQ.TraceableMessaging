@@ -36,6 +36,7 @@ Your simplest (without authorization) service class may look like:
 ```csharp
 public sealed class MyService
 {
+	// instance of RpcServer class from RabbitMQ.TraceableMessaging.ApplicationInsights namespace
 	private RpcServer<JwtSecurityContext> RpcServer { get; set; }
 	
 	public MyService(IConnection conn)
@@ -95,6 +96,7 @@ Your simplest client class can be similar to:
 ```csharp
 public sealed class MyClient
 {
+	// instance of RpcClient class from RabbitMQ.TraceableMessaging.ApplicationInsights namespace
 	protected RpcClient RpcClient { get; set; }
 	
 	public MyClient(IConnection conn)
