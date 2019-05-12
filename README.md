@@ -42,27 +42,22 @@ using RabbitMQ.TraceableMessaging.Jwt.Options;
 using RabbitMQ.TraceableMessaging.ApplicationInsights;
 ...
 
-public sealed class Service : IDisposable
+public sealed class MyService
 {
-	protected IModel Channel { get; set; }
-	protected RpcServer<JwtSecurityContext> RpcServer { get; set; }
+	private RpcServer<JwtSecurityContext> RpcServer { get; set; }
 	
-	public Service(IConnection conn, TelemetryClient telemetryClient)
+	public MyService(IConnection conn)
 	{
 		// create channel over RabbitMQ connection
-		Channel = conn.CreateModel();
+		var channel = conn.CreateModel();
 		
 		// declare request queue
-		Channel.QueueDeclare("service_queue_name");
-		
-		// configure consume options
-		var consumeOptions = new ConsumeOptions();
-		consumeOptions.Queue = "service_queue_name";
+		channel.QueueDeclare("service_queue_name");
 		
 		// create RPC server instance
 		RpcServer = new RpcServer<JwtSecurityContext>(
-			Channel,
-			consumeOptions, 
+			channel,
+			new ConsumeOptions(queue), 
 			new JsonFormatOptions());
 		
 		// subscribe to events
@@ -98,18 +93,12 @@ public sealed class Service : IDisposable
 			RpcServer.Fail(ea, ex);
 		}
 	}
-
-	public void Dispose()
-	{
-		RpcServer.Dispose();
-		Channel.Dispose();
-	}
 }
 ```
 
 In real application you probably wish to add authorization and make it hosted service (`IHostedService`). See [example project](https://github.com/dmlarionov/RabbitMQ.TraceableMessaging-example1) to learn how to do it.
 
-Your simplest client class may have properties and constructor similar to:
+Your simplest client class may be made similar to:
 
 ```csharp
 using Microsoft.ApplicationInsights.Extensibility;
@@ -120,38 +109,28 @@ using RabbitMQ.TraceableMessaging.Jwt.Options;
 using RabbitMQ.TraceableMessaging.ApplicationInsights;
 ...
 
-public sealed class Client : IDisposable
+public sealed class MyClient
 {
-	protected IModel Channel { get; set; }
 	protected RpcClient RpcClient { get; set; }
 	
-	public Client(IConnection conn, TelemetryClient telemetryClient)
+	public MyClient(IConnection conn, TelemetryClient telemetryClient)
 	{
 		// create channel over RabbitMQ connection
-		Channel = conn.CreateModel();
+		var channel = conn.CreateModel();
 		
 		// declare response queue
 		responseQueue = "reply-to-" + $"{Guid.NewGuid().ToString()}";
-		Channel.QueueDeclare(
+		channel.QueueDeclare(
 			queue: responseQueue,
 			durable: false,
 			exclusive: true,
 			autoDelete: true);
 		
-		// configure publish options
-		var publishOptions = new PublishOptions();
-		publishOptions.RoutingKey = "service_queue_name";
-		
-		// configure consume options
-		var consumeOptions = new ConsumeOptions();
-		consumeOptions.AutoAck = true;
-		consumeOptions.Queue = responseQueue;
-		
 		// create RPC client instance
 		RpcClient = new RpcClient(
-			Channel,
-			publishOptions,
-			consumeOptions, 
+			channel,
+			new PublishOptions("service_queue_name"),
+			new ConsumeOptions(responseQueue), 
 			new JsonFormatOptions());
 		}
 	}
@@ -160,10 +139,12 @@ public sealed class Client : IDisposable
 	{
 		Channel.Dispose();
 	}
+	
+	... // some application methods
 }
 ```
 
-Request from a client to a service can be made this way:
+Request in client application method can be made this way:
 
 ```csharp
 var request = new RequestA();
