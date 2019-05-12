@@ -138,7 +138,7 @@ For authorized request pass access token as an argument to `RpcClient.GetReply<R
 
 Exceptions defined in namespace `RabbitMQ.TraceableMessaging.Exceptions` can be thrown by `RpcClient`:
 
-- `ForbiddenException` - The server understood the request but refuses to authorize it. Equivalent of HTTP 403.
+- `ForbiddenException` - The server understood the request but refuses to authorize it. Equivalent to HTTP 403.
 - `UnauthorizedException` - Lacks of valid authorization token. Like HTTP 401. Should lead to authorization round trip.
 - `RequestFailureException` - The server cannot process due to something. Like HTTP 500.
 - `InvalidReplyException` - The client can't read the response.
