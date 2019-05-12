@@ -34,14 +34,6 @@ Create request and response types in some library project then reference to it f
 Your simplest (without authorization) service class may look like:
 
 ```csharp
-using Microsoft.ApplicationInsights.Extensibility;
-using RabbitMQ.Client;
-using RabbitMQ.TraceableMessaging.Options;
-using RabbitMQ.TraceableMessaging.Json.Options;
-using RabbitMQ.TraceableMessaging.Jwt.Options;
-using RabbitMQ.TraceableMessaging.ApplicationInsights;
-...
-
 public sealed class MyService
 {
 	private RpcServer<JwtSecurityContext> RpcServer { get; set; }
@@ -101,14 +93,6 @@ In real application you probably wish to add authorization and make service clas
 Your simplest client class can be similar to:
 
 ```csharp
-using Microsoft.ApplicationInsights.Extensibility;
-using RabbitMQ.Client;
-using RabbitMQ.TraceableMessaging.Options;
-using RabbitMQ.TraceableMessaging.Json.Options;
-using RabbitMQ.TraceableMessaging.Jwt.Options;
-using RabbitMQ.TraceableMessaging.ApplicationInsights;
-...
-
 public sealed class MyClient
 {
 	protected RpcClient RpcClient { get; set; }
