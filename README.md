@@ -51,7 +51,7 @@ public sealed class MyService
 		// create channel over RabbitMQ connection
 		var channel = conn.CreateModel();
 		
-		// declare request queue
+		// declare request queue (from clients to service)
 		channel.QueueDeclare("service_queue_name");
 		
 		// create RPC server instance
@@ -96,9 +96,9 @@ public sealed class MyService
 }
 ```
 
-In real application you probably wish to add authorization and make it hosted service (`IHostedService`). See [example project](https://github.com/dmlarionov/RabbitMQ.TraceableMessaging-example1) to learn how to do it.
+In real application you probably wish to add authorization and make service class a hosted service (`IHostedService`). See [example project](https://github.com/dmlarionov/RabbitMQ.TraceableMessaging-example1) to learn how to do it.
 
-Your simplest client class may be made similar to:
+Your simplest client class can be similar to:
 
 ```csharp
 using Microsoft.ApplicationInsights.Extensibility;
@@ -113,13 +113,13 @@ public sealed class MyClient
 {
 	protected RpcClient RpcClient { get; set; }
 	
-	public MyClient(IConnection conn, TelemetryClient telemetryClient)
+	public MyClient(IConnection conn)
 	{
 		// create channel over RabbitMQ connection
 		var channel = conn.CreateModel();
 		
-		// declare response queue
-		responseQueue = "reply-to-" + $"{Guid.NewGuid().ToString()}";
+		// declare response queue (from service to client)
+		responseQueue = $"reply-to-{Guid.NewGuid().ToString()}";
 		channel.QueueDeclare(
 			queue: responseQueue,
 			durable: false,
@@ -135,16 +135,11 @@ public sealed class MyClient
 		}
 	}
 	
-	public void Dispose()
-	{
-		Channel.Dispose();
-	}
-	
 	... // some application methods
 }
 ```
 
-Request in client application method can be made this way:
+Requests in the client class application methods can be made this way:
 
 ```csharp
 var request = new RequestA();
@@ -168,4 +163,4 @@ Following exceptions from other namespaces can be thrown by the client:
 
 ### Example
 
-You may get usage patterns from [example project](https://github.com/dmlarionov/RabbitMQ.TraceableMessaging-example1).
+You may get more usage patterns from [example project](https://github.com/dmlarionov/RabbitMQ.TraceableMessaging-example1).
