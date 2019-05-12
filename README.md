@@ -13,7 +13,7 @@ The repository contains .NET libraries for RPC over RabbitMQ with the following 
 Repository contains:
 
 1. `RabbitMQ.TraceableMessaging` - core library.
-2. `RabbitMQ.TraceableMessaging.ApplicationInsights` - implementation of distributed tracing for Application Insights.
+2. `RabbitMQ.TraceableMessaging.ApplicationInsights` - implementation for Application Insights.
 3. `RabbitMQ.TraceableMessaging.Json` - JSON serialization.
 4. `RabbitMQ.TraceableMessaging.Jwt` - JWT support.
 5. `RabbitMQ.TraceableMessaging.YamlDotNet` - YAML serialization.
@@ -23,13 +23,13 @@ Repository contains:
 In your service and client projects add references to:
 
 - `RabbitMQ.TraceableMessaging` package.
-- One of serialization packages (otherwise you may use `RabbitMQ.TraceableMessaging.Options.FormatOptions` class with your delegates and `ContentType` value assigned).
-- `RabbitMQ.TraceableMessaging.ApplicationInsights` or your own implementation for any other distributed tracing system.
-- `RabbitMQ.TraceableMessaging.Jwt` or your own implementation for any other token type.
+- Serialization package (`RabbitMQ.TraceableMessaging.Json` or `RabbitMQ.TraceableMessaging.YamlDotNet`).
+- `RabbitMQ.TraceableMessaging.ApplicationInsights` or your own implementation.
+- `RabbitMQ.TraceableMessaging.Jwt` or your own implementation.
 
-Create request and response types. Do it in library project to include it to your service and to its clients. Reply types have to inherit from `RabbitMQ.TraceableMessaging.Models.Reply`.
+Create request and response types in library project then reference to it from both service and clients. Reply types have to inherit from `RabbitMQ.TraceableMessaging.Models.Reply`.
 
-Simplest service looks like:
+Simple service class built from scratch may look like:
 
 ```csharp
 using Microsoft.ApplicationInsights.Extensibility;
@@ -114,7 +114,7 @@ public sealed class Service : IDisposable
 }
 ```
 
-Simplest client looks like:
+Simple client may be similar to:
 
 ```csharp
 using Microsoft.ApplicationInsights.Extensibility;
@@ -173,25 +173,25 @@ public sealed class Client : IDisposable
 }
 ```
 
-Simplest request to service on client side looks like:
+Request from a client to a service can be make this way:
 
 ```csharp
 var request = new RequestA();
 var response = RpcClient.GetReply<ResponseA>(request: request);
 ```
 
-## Exceptions
+## Exceptions can be thrown
 
-Following exceptions defined in `RabbitMQ.TraceableMessaging.Exceptions` can be thrown:
+Exceptions defined in namespace `RabbitMQ.TraceableMessaging.Exceptions` can be thrown:
 
-- `ForbiddenException` - The server understood the request but refuses to authorize it. Like HTTP 403.
-- `UnauthorizedException` - The request has not been applied because it lacks valid authentication credentials for the target resource. Like HTTP 401. Should lead to authorization round trip on client side.
-- `RequestFailureException` - The server cannot or will not process the request due to something that is perceived to be a client error. Like HTTP 400.
-- `InvalidReplyException` - Library at client side can't read response.
+- `ForbiddenException` - The server understood the request but refuses to authorize it. Equivalent of HTTP 403.
+- `UnauthorizedException` - The request lacks authentication credentials. Like HTTP 401. Should lead to authorization round trip.
+- `RequestFailureException` - The server cannot process due to something. Like HTTP 500.
+- `InvalidReplyException` - The client can't read the response.
 
-`System.TimeoutException` can be thrown, which means than reply didn't arrive after a time specified in request or set as default timeout through `RpcClient` properties (1 minute by default).
+Following exceptions from other namespaces can be thrown: 
 
-`ForbiddenException`  and `UnauthorizedException`  can be thrown only if `SecurityOptions` are passed to constructor of `RpcServer<..>`.
+`System.TimeoutException` - reply didn't arrive in time.
 
 ## Authorization
 
@@ -212,90 +212,4 @@ There are two classes related to security you have to understand.
 
 ### Example
 
-Imagine you have mapping between request types and access token scopes in dictionary:
-
-```csharp
-private IDictionary<string, string> Map { get; set; }
-```
-
-You want to authorize requests by checking for mapped scope:
-
-```csharp
-public AuthzResult AuthorizeFunc(string requestType, JwtSecurityContext context)
-{
-	string checkScope;
-	if (!Map.TryGetValue(requestType, out checkScope))
-		return new AuthzResult(false, $"No scope defined for {requestType}");
-	
-	if (context.Principal.Claims.Where(c => c.Type == "scope" && c.Value == checkScope).Any())
-		return new AuthzResult(true);	// permitted
-	else
-		return new AuthzResult(false, $"Scope '{checkScope}' is required for request of type '{requestType}' to the service");	// forbidden
-}
-```
-
-There can be any logic, but simple mapping is the most relevant example for majority of scenarios.
-
-You have to create `TokenValidationParameters` to validate token itself ('is it correctly issued?'):
-
-```csharp
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Protocols;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.IdentityModel.Tokens;
-...
-
-var p = new TokenValidationParameters 
-{
-	ValidAudience = "service_name",
-	ValidIssuer = "authority_url"
-};
-
-await setKeysAsync("authority_url", keys => p.IssuerSigningKeys = keys);
-
-...
-/// <summary>
-/// Set issuer signing keys by looking to Open Id Connect metadata
-/// </summary>
-private static async Task setKeysAsync(string AuthorityUrl, Action<ICollection<SecurityKey>> setKeysFunc)
-{
-	string OpenIdConnectUrl = $"{AuthorityUrl}/.well-known/openid-configuration";
-	try
-	{
-		IConfigurationManager<OpenIdConnectConfiguration> configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(OpenIdConnectUrl, new OpenIdConnectConfigurationRetriever());
-		OpenIdConnectConfiguration openIdConfig = await configurationManager.GetConfigurationAsync(CancellationToken.None);
-		setKeysFunc(openIdConfig.SigningKeys);
-	}
-	catch(Exception e)
-	{
-		throw new Exception($"Can't reach {OpenIdConnectUrl}", e);
-	}
-}
-```
-
-Create your `JwtSecurityOptions` and instantiate  `RpcServer<JwtSecurityContext>` based on it:
-
-```csharp
-var options = new JwtSecurityOptions(p)	// p is TokenValidationParameters
-{
-	Authorize = AuthorizeFunc	// AuthorizeFunc based on mapping is declared above
-};
-
-// create RPC server instance
-RpcServer = new RpcServer<JwtSecurityContext>(
-	Channel,
-	consumeOptions, 
-	new JsonFormatOptions(),
-	JwtSecurityOptions,	// validate token and authorize
-	TelemetryClient);
-```
-
-Done! You have protected your API over RabbitMQ.
-
-## Usage without authorization
-
-If you don't need authorization at all then create your own stub implementation of `RabbitMQ.TraceableMessaging.Models.SecurityContext` or just use `RabbitMQ.TraceableMessaging.Jwt` as type parameter without passing any `SecurityOptions` to `RpcServer<..>` constructor.
-
-If you have already implemented RPC without authorization (as shown above), but you are going to extend your service with security while keeping backward compatibility, then use `SecurityOptions.SkipForRequestTypes` collection for request types that have to stay unprotected.
-
-If you need a service that serves a public and protected request types then you can put your public request types into `SecurityOptions.SkipForRequestTypes`.
+Usage patterns you may get from [example project](https://github.com/dmlarionov/RabbitMQ.TraceableMessaging-example1).
