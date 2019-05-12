@@ -8,11 +8,11 @@ The repository contains .NET libraries for RPC over RabbitMQ with the following 
 1. Distributed traceability.
 2. Bearer token authorization.
 
-How can you benefit from this learn from [example project](https://github.com/dmlarionov/RabbitMQ.TraceableMessaging-example1).
+Learn how you can benefit from this at [example project](https://github.com/dmlarionov/RabbitMQ.TraceableMessaging-example1).
 
 ## Projects
 
-Repository contains:
+The repository contains:
 
 1. `RabbitMQ.TraceableMessaging` - core library.
 2. `RabbitMQ.TraceableMessaging.ApplicationInsights` - implementation for Application Insights.
@@ -29,9 +29,9 @@ In your service and client projects add references to:
 - `RabbitMQ.TraceableMessaging.ApplicationInsights` or your own implementation.
 - `RabbitMQ.TraceableMessaging.Jwt` or your own implementation.
 
-Create request and response types in library project then reference to it from both service and clients. Reply types have to inherit from `RabbitMQ.TraceableMessaging.Models.Reply`.
+Create request and response types in some library project then reference to it from both service and clients. Reply types have to inherit from `RabbitMQ.TraceableMessaging.Models.Reply` class.
 
-Simple service class built from scratch may look like:
+Your simplest (without authorization) service class may look like:
 
 ```csharp
 using Microsoft.ApplicationInsights.Extensibility;
@@ -46,13 +46,9 @@ public sealed class Service : IDisposable
 {
 	protected IModel Channel { get; set; }
 	protected RpcServer<JwtSecurityContext> RpcServer { get; set; }
-	protected TelemetryClient TelemetryClient { get; set; }
 	
 	public Service(IConnection conn, TelemetryClient telemetryClient)
 	{
-		// keep telemetry client reference to use for exception tracking
-		TelemetryClient = telemetryClient ?? new TelemetryClient(TelemetryConfiguration.Active);
-		
 		// create channel over RabbitMQ connection
 		Channel = conn.CreateModel();
 		
@@ -67,9 +63,7 @@ public sealed class Service : IDisposable
 		RpcServer = new RpcServer<JwtSecurityContext>(
 			Channel,
 			consumeOptions, 
-			new JsonFormatOptions(),
-			null,	// null - skip token validation and authorization
-			TelemetryClient);
+			new JsonFormatOptions());
 		
 		// subscribe to events
 		RpcServer.Received += OnReceive;
@@ -83,28 +77,25 @@ public sealed class Service : IDisposable
 			{
 				// Request A
 				case nameof(RequestA):
-				...	// create reply for request A
-				Server.Reply(ea.CorrelationId, reply);
-				break;
+					...	// do job for request A
+					Server.Reply(ea.CorrelationId, reply);
+					break;
 				
 				// Request B
 				case nameof(RequestB):
-				...	// create reply for request B
-				Server.Reply(ea.CorrelationId, reply);
-				break;
+					...	// do job for request B
+					Server.Reply(ea.CorrelationId, reply);
+					break;
 				
-				// any other case explores in the end
+				// Other request type
 				default:
-				throw new Exception("Unsupported request type!");
+					throw new NotImplementedException($"{ea.RequestType} is not implemented");
 			}
 		}
 		catch(Exception e)
 		{
-			// track exception on server side to telemetry
-			TelemetryClient.TrackException(e);
-			
-			// reply with failure
-			RpcServer.Reply(ea.CorrelationId, new Reply { Status = ReplyStatus.Fail });
+			// track exception and reply with failure
+			RpcServer.Fail(ea, ex);
 		}
 	}
 
@@ -116,7 +107,9 @@ public sealed class Service : IDisposable
 }
 ```
 
-Simple client may be similar to:
+In real application you probably wish to add authorization and make it hosted service (`IHostedService`). See [example project](https://github.com/dmlarionov/RabbitMQ.TraceableMessaging-example1) to learn how to do it.
+
+Your simplest client class may have properties and constructor similar to:
 
 ```csharp
 using Microsoft.ApplicationInsights.Extensibility;
@@ -131,13 +124,9 @@ public sealed class Client : IDisposable
 {
 	protected IModel Channel { get; set; }
 	protected RpcClient RpcClient { get; set; }
-	protected TelemetryClient TelemetryClient { get; set; }
 	
 	public Client(IConnection conn, TelemetryClient telemetryClient)
 	{
-		// keep telemetry client reference to use for exception tracking
-		TelemetryClient = telemetryClient ?? new TelemetryClient(TelemetryConfiguration.Active);
-		
 		// create channel over RabbitMQ connection
 		Channel = conn.CreateModel();
 		
@@ -163,8 +152,7 @@ public sealed class Client : IDisposable
 			Channel,
 			publishOptions,
 			consumeOptions, 
-			new JsonFormatOptions(),
-			TelemetryClient);
+			new JsonFormatOptions());
 		}
 	}
 	
@@ -175,12 +163,14 @@ public sealed class Client : IDisposable
 }
 ```
 
-Request from a client to a service can be make this way:
+Request from a client to a service can be made this way:
 
 ```csharp
 var request = new RequestA();
 var response = RpcClient.GetReply<ResponseA>(request: request);
 ```
+
+For authorized request pass access token as an argument to `RpcClient.GetReply<ResponseA>(request: request, accessToken: token)`.
 
 ## Exceptions can be thrown
 
@@ -191,10 +181,10 @@ Exceptions defined in namespace `RabbitMQ.TraceableMessaging.Exceptions` can be 
 - `RequestFailureException` - The server cannot process due to something. Like HTTP 500.
 - `InvalidReplyException` - The client can't read the response.
 
-Following exceptions from other namespaces can be thrown: 
+Following exceptions from other namespaces can be thrown by the client: 
 
 `System.TimeoutException` - reply didn't arrive in time.
 
 ### Example
 
-Usage patterns you may get from [example project](https://github.com/dmlarionov/RabbitMQ.TraceableMessaging-example1).
+You may get usage patterns from [example project](https://github.com/dmlarionov/RabbitMQ.TraceableMessaging-example1).
