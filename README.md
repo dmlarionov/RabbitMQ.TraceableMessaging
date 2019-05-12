@@ -8,6 +8,8 @@ The repository contains .NET libraries for RPC over RabbitMQ with the following 
 1. Distributed traceability.
 2. Bearer token authorization.
 
+How can you benefit from this learn from [example project](https://github.com/dmlarionov/RabbitMQ.TraceableMessaging-example1).
+
 ## Projects
 
 Repository contains:
@@ -192,23 +194,6 @@ Exceptions defined in namespace `RabbitMQ.TraceableMessaging.Exceptions` can be 
 Following exceptions from other namespaces can be thrown: 
 
 `System.TimeoutException` - reply didn't arrive in time.
-
-## Authorization
-
-There are two classes related to security you have to understand.
-
-*Security context* - type parameter of  `RpcServer<..>`. Security context is introduced to:
-
-- Keep security info required for request authorization, at least validated token and principal.
-- Keep some additional information to use in telemetry related to security. Token issuer for instance.
-
-*Security options* - object passed to `RpcServer<..>` constructor. It configures behavior:
-
-- Token validation and creation of security context through `CreateSecurityContext` delegate.
-- Authorization through `Authorize` delegate.
-- Skipping for any security for certain requests through `SkipForRequestTypes` collection.
-
-`RabbitMQ.TraceableMessaging.Jwt` contains implementation for both context and options based on JWT, but you have to configure `Authorize` by implementing your own rules of authorization.
 
 ### Example
 
