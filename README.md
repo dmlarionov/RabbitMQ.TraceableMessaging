@@ -125,7 +125,7 @@ public sealed class MyClient
 }
 ```
 
-Requests in the client class application methods can be made this way:
+Requests in your client class application methods can be made this way:
 
 ```csharp
 var request = new RequestA();
