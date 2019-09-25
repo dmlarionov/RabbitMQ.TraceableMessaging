@@ -34,8 +34,7 @@ steps:
   displayName: 'dotnet build -c $(buildConfiguration)'
   inputs:
     command: 'build'
-    arguments: '-c $(buildConfiguration)'
-    versioningScheme: 'byBuildNumber'
+    arguments: '-c $(buildConfiguration) /p:Version=$(build.buildNumber)'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test -c $(buildConfiguration) --no-build'
