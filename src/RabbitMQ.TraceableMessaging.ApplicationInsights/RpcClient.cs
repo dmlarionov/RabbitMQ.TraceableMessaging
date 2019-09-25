@@ -64,6 +64,13 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
             // this variable keeps result to return
             TReply response;
 
+            // create telemetry properties
+            var telemetryProps = new Dictionary<string, string>{
+                { "Object Type", request.GetType().Name },
+                { "Exchange", _publishOptions.Exchange },
+                { "RoutingKey", _publishOptions.RoutingKey }
+            };
+
             // start diagnostic activity
             var activity = new Activity(TelemetryOptions.GetDependencyName(_publishOptions, request));
 
@@ -72,6 +79,11 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
             {
                 // setup telemetry operation type
                 operation.Telemetry.Type = TelemetryOptions.TelemetryType;
+
+                // enrich telemetry with properties
+                if (operation.Telemetry.Properties != null)
+                    foreach (var k in telemetryProps.Keys)
+                        operation.Telemetry.Properties.Add(k, telemetryProps[k]);
 
                 // try execute dependency call
                 try
@@ -94,7 +106,7 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
                 {
                     // FIXME: exception doesn't keep telemetry operation in it's context!
                     if (_telemetryClient.IsEnabled())
-                        _telemetryClient.TrackException(e);
+                        _telemetryClient.TrackException(e, operation.Telemetry?.Properties ?? telemetryProps);
 
                     // request is unsuccessful now
                     operation.Telemetry.Success = false;

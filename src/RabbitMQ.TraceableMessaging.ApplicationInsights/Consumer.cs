@@ -55,15 +55,19 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
         {
             var telemetryProps = new Dictionary<string, string>{
                 { "Object Type", objectType },
-                { "Queue", _consumeOptions.Queue }
+                { "Queue", _consumeOptions.Queue },
+                { "RoutingKey", ea.RoutingKey }
             };
 
             if (_telemetryClient.IsEnabled())
                     _telemetryClient.TrackEvent("Message consumed from RabbitMQ (not RPC)", 
                         telemetryProps);
 
-            // telemetry context has nothing to do with unidirectional message 
-            return null;
+            // context is defined for sake of transmitting properties to exception with telemetry context
+            // no telemetry operation or activity is defined for non RPC scenario
+            return new TelemetryContext {
+                Properties = telemetryProps
+            };
         }
 
         /// <summary>
@@ -74,6 +78,17 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
         {
             if (_telemetryClient.IsEnabled()) 
                 _telemetryClient.TrackException(e);
+        }
+
+        /// <summary>
+        /// Register exception in telemetry with telemetry context
+        /// </summary>
+        /// <param name="e">Exception</param>
+        /// <param name="telemetry">Telemetry context</param>
+        protected override void TrackException(Exception e, TelemetryContext telemetry)
+        {
+            if (_telemetryClient.IsEnabled()) 
+                _telemetryClient.TrackException(e, telemetry?.Properties);
         }
 
         protected override void UpdateTelemetryContext(TelemetryContext telemetry, TSecurityContext security)

@@ -159,8 +159,8 @@ namespace RabbitMQ.TraceableMessaging
 
                 // create remote call object
                 if (CreateRemoteCall(
-                    ea.BasicProperties, 
-                    ea.DeliveryTag, 
+                    ea.BasicProperties,
+                    ea.DeliveryTag,
                     out correlationId,
                     out requestType,
                     out remoteCall))
@@ -231,17 +231,17 @@ namespace RabbitMQ.TraceableMessaging
                     }
                     catch(UnauthorizedException e)
                     {
-                        TrackException(e);
+                        TrackException(e, remoteCall?.Telemetry);
                         ReplyWithUnauthorized(correlationId, remoteCall.Telemetry, e.Message);
                     }
                     catch(ForbiddenException e)
                     {
-                        TrackException(e);
+                        TrackException(e, remoteCall?.Telemetry);
                         ReplyWithForbidden(correlationId, remoteCall.Telemetry, e.Message);
                     }
                     catch(Exception e)
                     {
-                        TrackException(e);
+                        TrackException(e, remoteCall?.Telemetry);
                         ReplyWithFail(correlationId, remoteCall.Telemetry, e.Message);
                     }
                 }
@@ -390,6 +390,13 @@ namespace RabbitMQ.TraceableMessaging
         /// </summary>
         /// <param name="e">Exception</param>
         protected abstract void TrackException(Exception e);
+
+        /// <summary>
+        /// Register exception in telemetry with telemetry context
+        /// </summary>
+        /// <param name="e">Exception</param>
+        /// <param name="telemetry">Telemetry context</param>
+        protected abstract void TrackException(Exception e, TTelemetryContext telemetry);
 
         /// <summary>
         /// Send reply to calling party using RabbitMQ.

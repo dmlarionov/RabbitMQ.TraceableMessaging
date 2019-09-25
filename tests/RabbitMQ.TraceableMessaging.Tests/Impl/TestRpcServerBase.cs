@@ -34,6 +34,11 @@ namespace RabbitMQ.TraceableMessaging.Tests.Impl
             OnTrackException?.Invoke();
         }
 
+        protected override void TrackException(Exception e, TestTelemetryContext telemetry)
+        {
+            OnTrackException?.Invoke();
+        }
+
         protected override void UpdateTelemetryContext(TestTelemetryContext telemetry, TestSecurityContext security)
         {
             OnUpdateTelemetryContext?.Invoke();

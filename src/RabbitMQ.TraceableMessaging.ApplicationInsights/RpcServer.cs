@@ -103,6 +103,18 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
                     // start telemetry operation (without parent)
                     operation = _telemetryClient.StartOperation<RequestTelemetry>(TelemetryOptions.GetRequestName(ea), operationId);
 
+                // create telemetry properties
+                var telemetryProps = new Dictionary<string, string>{
+                    { "Object Type", remoteCall?.RequestType },
+                    { "Queue", _consumeOptions.Queue },
+                    { "RoutingKey", ea.RoutingKey }
+                };
+                
+                // enrich telemetry with properties
+                if (operation.Telemetry.Properties != null)
+                    foreach (var k in telemetryProps.Keys)
+                        operation.Telemetry.Properties.Add(k, telemetryProps[k]);
+
                 // support source here (currently not supported by RpcClient)
                 if (!string.IsNullOrEmpty(source))
                     operation.Telemetry.Source = source;
@@ -222,6 +234,17 @@ namespace RabbitMQ.TraceableMessaging.ApplicationInsights
         { 
             if (_telemetryClient.IsEnabled()) 
                 _telemetryClient.TrackException(e);
+        }
+
+        /// <summary>
+        /// Register exception in telemetry with telemetry context
+        /// </summary>
+        /// <param name="e">Exception</param>
+        /// <param name="telemetry">Telemetry context</param>
+        protected override void TrackException(Exception e, TelemetryContext telemetry)
+        {
+            if (_telemetryClient.IsEnabled()) 
+                _telemetryClient.TrackException(e, telemetry?.Properties);
         }
 
         /// <summary>

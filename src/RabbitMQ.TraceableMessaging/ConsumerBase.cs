@@ -208,7 +208,7 @@ namespace RabbitMQ.TraceableMessaging
                 }
                 catch(Exception e)
                 {
-                    TrackException(e);
+                    TrackException(e, telemetry);
                 }
             }
         }
@@ -256,5 +256,12 @@ namespace RabbitMQ.TraceableMessaging
         /// </summary>
         /// <param name="e">Exception</param>
         protected abstract void TrackException(Exception e);
+
+        /// <summary>
+        /// Register exception in telemetry with telemetry context
+        /// </summary>
+        /// <param name="e">Exception</param>
+        /// <param name="telemetry">Telemetry context</param>
+        protected abstract void TrackException(Exception e, TTelemetryContext telemetry);
     }
 }
