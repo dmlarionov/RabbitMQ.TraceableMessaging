@@ -255,7 +255,7 @@ namespace RabbitMQ.TraceableMessaging
         /// <param name="deliveryTag">Delivery tag</param>
         /// <param name="correlationId">Correlation Id</param>
         /// <param name="requestType">Request type</param>
-        /// <param name="RemoteCall">Resulting remote call object</param>
+        /// <param name="remoteCall">Resulting remote call object</param>
         /// <returns>True if remote call is created</returns>
         protected virtual bool CreateRemoteCall(
             IBasicProperties props, 
@@ -543,7 +543,8 @@ namespace RabbitMQ.TraceableMessaging
         /// Track exception to telemetry and reply according to exception type.
         /// By using this in try .. catch you create correct reply if dependency throws exception.
         /// </summary>
-        /// <param name="e"></param>
+        /// <param name="ea">Request Event Arguments</param>
+        /// <param name="e">Exception of request processing</param>
         public void Fail(RequestEventArgs<TTelemetryContext, TSecurityContext> ea, Exception e)
         {
             TrackException(e);
